@@ -50,6 +50,7 @@ const game = {
   paused: false,
   won: false,
   message: "...",
+  startOverlayMode: "levelStart",
 };
 
 const paddle = {
@@ -275,6 +276,8 @@ function renderLeaderboardStatus() {
 
   leaderboardStatusElement.classList.add("hidden");
   leaderboardStatusElement.classList.remove(
+    "leaderboard-status-loading",
+    "leaderboard-status-text",
     "leaderboard-status-info",
     "leaderboard-status-error"
   );
@@ -291,6 +294,7 @@ function renderLeaderboardStatus() {
   );
 
   if (status.kind === "loading") {
+    leaderboardStatusElement.classList.add("leaderboard-status-loading");
     const dots = document.createElement("span");
     dots.className = "loading-dots";
     dots.setAttribute("aria-label", status.label || "Ładowanie");
@@ -307,6 +311,7 @@ function renderLeaderboardStatus() {
     return;
   }
 
+  leaderboardStatusElement.classList.add("leaderboard-status-text");
   leaderboardStatusElement.textContent = status.text;
 }
 
@@ -464,7 +469,13 @@ function renderStartOverlay() {
   }
 
   startOverlayTitleElement.textContent = game.message;
-  startOverlaySubtitleElement.textContent = "Zaczynamy? 🚀";
+  if (game.startOverlayMode === "continue") {
+    startOverlaySubtitleElement.textContent = "Nic straconego. 🙂";
+    startOverlayButton.textContent = "Kontynuuj";
+  } else {
+    startOverlaySubtitleElement.textContent = "Zaczynamy? 🚀";
+    startOverlayButton.textContent = "Start";
+  }
 }
 
 function pauseGame() {
@@ -797,10 +808,12 @@ function launchBall() {
   ball.trail = [];
   game.running = true;
   game.message = "";
+  game.startOverlayMode = "levelStart";
   renderStartOverlay();
 }
 
 function resetRound() {
+  const isLifeContinuation = game.running || game.message === "";
   fallingBonuses = [];
   projectiles = [];
   game.paused = false;
@@ -816,6 +829,7 @@ function resetRound() {
     game.lives > 0
       ? `Poziom ${game.level}`
       : "Koniec gry";
+  game.startOverlayMode = isLifeContinuation ? "continue" : "levelStart";
   renderStartOverlay();
   renderPauseOverlay();
 }
@@ -825,6 +839,7 @@ function resetGame() {
   game.lives = 3;
   game.level = 1;
   game.won = false;
+  game.startOverlayMode = "levelStart";
   clearEffects();
   createBricks();
   resetRound();
@@ -953,6 +968,7 @@ function hitBrick(brick) {
     createBricks();
     resetRound();
     game.message = `Poziom ${game.level}`;
+    game.startOverlayMode = "levelStart";
     renderStartOverlay();
     updateHud();
   }

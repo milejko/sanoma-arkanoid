@@ -102,3 +102,7 @@ Plik utrzymywany na bieżąco. Każde kolejne polecenie użytkownika w tej sesji
 96. `dodatkowy superbonus, trwa 5s - pilka zabarwia sie na czerwono (smuga tez) i rozbija wszystkie kafle na drodze`
 97. `albo lepiej ognia`
 98. `bardziej ogniowy`
+99. `dodaj numer wersji 1.0.X w prawym dolnym rogu, gdzie X = numer biezacego polecenia z history.md`
+100. `animacja trzech kropek powinna byc jednak po prawej stronie od guzika i nie powinna "poruszac" guzikiem - przesuwac go`
+101. `to jednak te kropki po lewej stronie a guzik do prawej, tak zeby nie ruszal sie jak pojawiaja sie i znikaja kropki`
+102. `blenda poziom X - rozrozniamy start poziomu i kontynuacje po utracie zycia - nowy poziom = guzik start, po utracie zycia guzik "kontynuuj". Zmiana napisu przy kontynuacji z "Zaczynamy?" + rakieta na "Nic straconego." i ikonka usmiechu`
