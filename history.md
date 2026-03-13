@@ -97,3 +97,8 @@ Plik utrzymywany na bieżąco. Każde kolejne polecenie użytkownika w tej sesji
 91. `na blendzie pauza w tekscie piktogramy 3x kaw`
 92. `tabletki pozytywne bardziej zielone, negatywne bardziej czerwone`
 93. `blenda startowa zamiast "zaczynamy?" "Zaczynamy?" + piktogram rakiety`
+94. `5 rzedow kafelkow powinno miec nad soba przestrzen wysokosci 2 rzedow kafli, zeby pilka mogla wpasc nad kafle`
+95. `nie zrozumiales - kanwa ma zostac jak w oryginale, tylko kafle musza wisiec jakby "w powietrzu"`
+96. `dodatkowy superbonus, trwa 5s - pilka zabarwia sie na czerwono (smuga tez) i rozbija wszystkie kafle na drodze`
+97. `albo lepiej ognia`
+98. `bardziej ogniowy`

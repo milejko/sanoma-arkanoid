@@ -92,13 +92,17 @@ function getBrickColumns() {
   return 8;
 }
 
-function getBrickTopOffset() {
+function getPlayfieldTopBoundary() {
   const chromeBottom = topChromeElement
     ? Math.ceil(topChromeElement.getBoundingClientRect().bottom)
     : 0;
-  const extraTopGap = brickConfig.height + brickConfig.gap;
 
-  return Math.max(brickConfig.topOffset, chromeBottom + 20) + extraTopGap;
+  return Math.max(brickConfig.topOffset, chromeBottom + 20);
+}
+
+function getBrickTopOffset() {
+  const extraTopGap = (brickConfig.height + brickConfig.gap) * 2;
+  return getPlayfieldTopBoundary() + extraTopGap;
 }
 
 const bonusCatalog = {
@@ -121,6 +125,11 @@ const bonusCatalog = {
     label: "+1 życie",
     symbol: "L",
     color: "#f472b6",
+  },
+  superBall: {
+    label: "Super piłka",
+    symbol: "*",
+    color: "#ef4444",
   },
   shrinkHalf: {
     label: "Paletka -50%",
@@ -590,7 +599,8 @@ function isPositiveBonus(type) {
     type === "sticky" ||
     type === "shooter" ||
     type === "extraLife" ||
-    type === "speedDouble"
+    type === "speedDouble" ||
+    type === "superBall"
   );
 }
 
@@ -603,6 +613,8 @@ const effects = {
   stickyTimer: 0,
   shooterActive: false,
   shooterTimer: 0,
+  superBallActive: false,
+  superBallTimer: 0,
   speedModifier: 0,
   speedTimer: 0,
   shotCooldown: 0,
@@ -639,6 +651,7 @@ function createBricks() {
     "sticky",
     "shooter",
     "extraLife",
+    "superBall",
     "shrinkHalf",
     "shrinkThird",
     "speedDouble",
@@ -736,6 +749,8 @@ function clearEffects() {
   effects.stickyTimer = 0;
   effects.shooterActive = false;
   effects.shooterTimer = 0;
+  effects.superBallActive = false;
+  effects.superBallTimer = 0;
   effects.speedModifier = 0;
   effects.speedTimer = 0;
   effects.shotCooldown = 0;
@@ -892,7 +907,7 @@ function bounceOffPaddle() {
 }
 
 function bounceOffWalls() {
-  const topBoundary = getBrickTopOffset();
+  const topBoundary = getPlayfieldTopBoundary();
 
   if (ball.x + ball.radius >= canvas.width) {
     ball.x = canvas.width - ball.radius;
@@ -943,7 +958,40 @@ function hitBrick(brick) {
   }
 }
 
-function bounceOffBricks(previousX) {
+function bounceOffBricks(previousX, previousY) {
+  if (effects.superBallActive) {
+    const pathLeft = Math.min(previousX, ball.x) - ball.radius;
+    const pathRight = Math.max(previousX, ball.x) + ball.radius;
+    const pathTop = Math.min(previousY, ball.y) - ball.radius;
+    const pathBottom = Math.max(previousY, ball.y) + ball.radius;
+    const collidedBricks = bricks.filter((brick) => {
+      if (!brick.alive) {
+        return false;
+      }
+
+      return (
+        pathRight >= brick.x &&
+        pathLeft <= brick.x + brick.width &&
+        pathBottom >= brick.y &&
+        pathTop <= brick.y + brick.height
+      );
+    });
+
+    for (const brick of collidedBricks) {
+      if (!brick.alive) {
+        continue;
+      }
+
+      hitBrick(brick);
+
+      if (!game.running || ball.attached) {
+        break;
+      }
+    }
+
+    return;
+  }
+
   for (const brick of bricks) {
     if (!brick.alive) {
       continue;
@@ -1013,6 +1061,9 @@ function activateBonus(type) {
     effects.shooterTimer = 15;
   } else if (type === "extraLife") {
     game.lives = Math.min(3, game.lives + 1);
+  } else if (type === "superBall") {
+    effects.superBallActive = true;
+    effects.superBallTimer = 5;
   } else if (type === "speedDouble") {
     const previousSpeedFactor = 1 + effects.speedModifier;
     effects.speedModifier = -0.25;
@@ -1061,6 +1112,14 @@ function updateEffects(deltaSeconds) {
     effects.shooterTimer = Math.max(0, effects.shooterTimer - deltaSeconds);
     if (effects.shooterTimer === 0) {
       effects.shooterActive = false;
+      hudChanged = true;
+    }
+  }
+
+  if (effects.superBallActive) {
+    effects.superBallTimer = Math.max(0, effects.superBallTimer - deltaSeconds);
+    if (effects.superBallTimer === 0) {
+      effects.superBallActive = false;
       hudChanged = true;
     }
   }
@@ -1179,13 +1238,14 @@ function updateBall(deltaSeconds) {
   }
 
   const previousX = ball.x;
+  const previousY = ball.y;
 
   ball.x += ball.velocityX * deltaSeconds;
   ball.y += ball.velocityY * deltaSeconds;
 
   bounceOffWalls();
   bounceOffPaddle();
-  bounceOffBricks(previousX);
+  bounceOffBricks(previousX, previousY);
 
   if (ball.y - ball.radius > canvas.height) {
     loseLife();
@@ -1283,6 +1343,7 @@ function drawPaddle() {
 function drawBall() {
   const speedTrailFactor =
     effects.speedModifier < 0 ? 1.95 : effects.speedModifier > 0 ? 0.55 : 1;
+  const isSuperBall = effects.superBallActive;
   for (let index = ball.trail.length - 1; index >= 0; index -= 1) {
     const trailPoint = ball.trail[index];
     const alpha =
@@ -1298,9 +1359,16 @@ function drawBall() {
       trailPoint.y,
       trailRadius
     );
-    trailGradient.addColorStop(0, `rgba(255, 255, 255, ${alpha})`);
-    trailGradient.addColorStop(0.45, `rgba(159, 174, 192, ${alpha * 0.9})`);
-    trailGradient.addColorStop(1, `rgba(31, 41, 55, 0)`);
+    if (isSuperBall) {
+      trailGradient.addColorStop(0, `rgba(255, 241, 241, ${alpha * 1.15})`);
+      trailGradient.addColorStop(0.35, `rgba(255, 106, 106, ${alpha})`);
+      trailGradient.addColorStop(0.72, `rgba(220, 38, 38, ${alpha * 0.82})`);
+      trailGradient.addColorStop(1, "rgba(127, 29, 29, 0)");
+    } else {
+      trailGradient.addColorStop(0, `rgba(255, 255, 255, ${alpha})`);
+      trailGradient.addColorStop(0.45, `rgba(159, 174, 192, ${alpha * 0.9})`);
+      trailGradient.addColorStop(1, `rgba(31, 41, 55, 0)`);
+    }
     context.beginPath();
     context.fillStyle = trailGradient;
     context.arc(trailPoint.x, trailPoint.y, trailRadius, 0, Math.PI * 2);
@@ -1315,11 +1383,19 @@ function drawBall() {
     ball.y,
     ball.radius
   );
-  gradient.addColorStop(0, "#ffffff");
-  gradient.addColorStop(0.18, "#dfe7ef");
-  gradient.addColorStop(0.45, "#9aa7b5");
-  gradient.addColorStop(0.72, "#556270");
-  gradient.addColorStop(1, "#1f2937");
+  if (isSuperBall) {
+    gradient.addColorStop(0, "#fff1f1");
+    gradient.addColorStop(0.18, "#fca5a5");
+    gradient.addColorStop(0.45, "#ef4444");
+    gradient.addColorStop(0.72, "#b91c1c");
+    gradient.addColorStop(1, "#7f1d1d");
+  } else {
+    gradient.addColorStop(0, "#ffffff");
+    gradient.addColorStop(0.18, "#dfe7ef");
+    gradient.addColorStop(0.45, "#9aa7b5");
+    gradient.addColorStop(0.72, "#556270");
+    gradient.addColorStop(1, "#1f2937");
+  }
 
   context.beginPath();
   context.fillStyle = gradient;
@@ -1327,13 +1403,17 @@ function drawBall() {
   context.fill();
 
   context.beginPath();
-  context.strokeStyle = "rgba(255, 255, 255, 0.5)";
+  context.strokeStyle = isSuperBall
+    ? "rgba(255, 232, 232, 0.72)"
+    : "rgba(255, 255, 255, 0.5)";
   context.lineWidth = 1.5;
   context.arc(ball.x, ball.y, ball.radius - 0.75, 0, Math.PI * 2);
   context.stroke();
 
   context.beginPath();
-  context.fillStyle = "rgba(255, 255, 255, 0.42)";
+  context.fillStyle = isSuperBall
+    ? "rgba(255, 244, 244, 0.36)"
+    : "rgba(255, 255, 255, 0.42)";
   context.arc(
     ball.x - ball.radius * 0.28,
     ball.y - ball.radius * 0.32,
@@ -1413,6 +1493,30 @@ function drawBonusIcon(type, centerX, centerY, size, isPositive) {
     context.bezierCurveTo(size * 0.18, -size * 0.42, 0, -size * 0.28, 0, -size * 0.14);
     context.bezierCurveTo(0, -size * 0.28, -size * 0.18, -size * 0.42, -size * 0.32, -size * 0.28);
     context.bezierCurveTo(-size * 0.5, -size * 0.1, -size * 0.36, size * 0.12, 0, size * 0.34);
+    context.closePath();
+    context.fill();
+  } else if (type === "superBall") {
+    context.fillStyle = "#ff5a1f";
+    context.strokeStyle = "#fff2b3";
+    context.lineWidth = Math.max(1.8, size * 0.1);
+    context.beginPath();
+    context.moveTo(0, -size * 0.34);
+    context.bezierCurveTo(size * 0.18, -size * 0.28, size * 0.24, -size * 0.06, size * 0.14, size * 0.08);
+    context.bezierCurveTo(size * 0.26, size * 0.02, size * 0.32, size * 0.24, size * 0.1, size * 0.34);
+    context.bezierCurveTo(size * 0.02, size * 0.28, -size * 0.02, size * 0.26, 0, size * 0.14);
+    context.bezierCurveTo(-size * 0.05, size * 0.28, -size * 0.24, size * 0.28, -size * 0.18, size * 0.08);
+    context.bezierCurveTo(-size * 0.3, 0, -size * 0.22, -size * 0.2, 0, -size * 0.34);
+    context.closePath();
+    context.fill();
+    context.stroke();
+    context.fillStyle = "#ffd54a";
+    context.beginPath();
+    context.moveTo(0, -size * 0.2);
+    context.bezierCurveTo(size * 0.08, -size * 0.14, size * 0.12, -size * 0.02, size * 0.06, size * 0.08);
+    context.bezierCurveTo(size * 0.12, size * 0.06, size * 0.14, size * 0.18, size * 0.03, size * 0.24);
+    context.bezierCurveTo(0, size * 0.16, -size * 0.02, size * 0.12, -size * 0.01, size * 0.04);
+    context.bezierCurveTo(-size * 0.04, size * 0.12, -size * 0.12, size * 0.14, -size * 0.08, size * 0.02);
+    context.bezierCurveTo(-size * 0.14, -size * 0.04, -size * 0.1, -size * 0.14, 0, -size * 0.2);
     context.closePath();
     context.fill();
   } else if (type === "shrinkHalf" || type === "shrinkThird") {
