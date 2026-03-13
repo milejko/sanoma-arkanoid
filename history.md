@@ -106,3 +106,10 @@ Plik utrzymywany na bieżąco. Każde kolejne polecenie użytkownika w tej sesji
 100. `animacja trzech kropek powinna byc jednak po prawej stronie od guzika i nie powinna "poruszac" guzikiem - przesuwac go`
 101. `to jednak te kropki po lewej stronie a guzik do prawej, tak zeby nie ruszal sie jak pojawiaja sie i znikaja kropki`
 102. `blenda poziom X - rozrozniamy start poziomu i kontynuacje po utracie zycia - nowy poziom = guzik start, po utracie zycia guzik "kontynuuj". Zmiana napisu przy kontynuacji z "Zaczynamy?" + rakieta na "Nic straconego." i ikonka usmiechu`
+103. `dugosc paletki powinna byc proporcjonalna do szerokosci ekranu`
+104. `super, ale startowo jest troszeczke za szeroka, zmniejszmy o 30%`
+105. `kanwa powinna miec lewy i prawy margines zgodny z tym ktory maja logotyp i HUD`
+106. `klikniecie w HUD robi pauze, dodatkowo - wszystkie bonusy sa usuwane po zmianie poziomu`
+107. `to moze przycisk`
+108. `fatalnie HUD jest teraz na srodku, wolalbym do prawej a przycisk wysokosci huda na lewo od niego`
+109. `to moze zamiast przycisku klikalne logo jako pauza i na mobile i normalnie`

@@ -1,5 +1,6 @@
 :root {
   color-scheme: dark;
+  --chrome-side-gap: 1rem;
 }
 
 * {
@@ -17,7 +18,11 @@ body {
 }
 
 canvas {
+  position: fixed;
+  inset: 0 var(--chrome-side-gap);
   display: block;
+  width: calc(100vw - 2rem);
+  height: 100vh;
 }
 
 .version-badge {
@@ -47,22 +52,34 @@ canvas {
 .brand-banner {
   position: relative;
   z-index: 2;
-  pointer-events: none;
   flex: 0 0 auto;
   max-width: 100%;
+}
+
+.pause-logo-button {
+  border: 0;
+  padding: 0;
+  background: transparent;
+  cursor: pointer;
+}
+
+.pause-logo-button:focus-visible {
+  outline: 2px solid rgba(56, 189, 248, 0.7);
+  outline-offset: 6px;
+  border-radius: 10px;
 }
 
 .top-chrome {
   position: fixed;
   top: 1rem;
-  left: 1rem;
-  right: 1rem;
+  left: var(--chrome-side-gap);
+  right: var(--chrome-side-gap);
   z-index: 2;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 1.5rem;
-  pointer-events: none;
+  pointer-events: auto;
 }
 
 .brand-mark {
@@ -235,6 +252,7 @@ canvas {
   pointer-events: none;
   flex: 0 0 auto;
   max-width: 100%;
+  margin-left: auto;
 }
 
 .panel {
@@ -494,15 +512,20 @@ canvas {
     width: 112px;
   }
 
-  .hud {
-    flex-direction: column;
-    align-items: center;
-    width: 100%;
-  }
-
   .top-chrome {
     width: calc(100vw - 2rem);
     flex-direction: column;
+    align-items: stretch;
+  }
+
+  .brand-banner {
+    align-self: flex-start;
+  }
+
+  .hud {
+    align-self: flex-end;
+    max-width: 100%;
+    width: auto;
   }
 
   .leaderboard-overlay {

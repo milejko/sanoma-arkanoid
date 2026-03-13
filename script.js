@@ -20,6 +20,7 @@ const scoreSubmitButton = document.getElementById("scoreSubmitButton");
 const leaderboardStartButton = document.getElementById("leaderboardStartButton");
 const pauseResumeButton = document.getElementById("pauseResumeButton");
 const startOverlayButton = document.getElementById("startOverlayButton");
+const pauseToggleButton = document.getElementById("pauseToggleButton");
 
 const controls = {
   left: false,
@@ -637,8 +638,9 @@ let projectiles = [];
 let lastPointerMoveTime = 0;
 
 function resizeCanvas() {
-  canvas.width = window.innerWidth;
-  canvas.height = window.innerHeight;
+  const { width, height } = canvas.getBoundingClientRect();
+  canvas.width = Math.floor(width);
+  canvas.height = Math.floor(height);
   layoutBricks();
   paddle.y = canvas.height - PADDLE_BOTTOM_OFFSET;
   paddle.baseWidth = getBasePaddleWidth();
@@ -727,7 +729,7 @@ function layoutBricks() {
 }
 
 function getBasePaddleWidth() {
-  return Math.min(140, Math.max(canvas.width * 0.18, 96));
+  return canvas.width * 0.126;
 }
 
 function getCurrentBallBaseSpeed() {
@@ -965,6 +967,7 @@ function hitBrick(brick) {
   if (bricks.every((candidate) => !candidate.alive)) {
     game.running = false;
     game.level += 1;
+    clearEffects();
     createBricks();
     resetRound();
     game.message = `Poziom ${game.level}`;
@@ -1745,7 +1748,8 @@ function handlePointerMove(event) {
   }
 
   const previousX = paddle.x;
-  const pointerX = "touches" in event ? event.touches[0].clientX : event.clientX;
+  const pointerClientX = "touches" in event ? event.touches[0].clientX : event.clientX;
+  const pointerX = pointerClientX - canvas.getBoundingClientRect().left;
   paddle.x = pointerX - paddle.width / 2;
   paddle.x = Math.max(0, Math.min(canvas.width - paddle.width, paddle.x));
   const currentTime = typeof event.timeStamp === "number" ? event.timeStamp : 0;
@@ -1890,6 +1894,10 @@ pauseResumeButton.addEventListener("click", () => {
 
 startOverlayButton.addEventListener("click", () => {
   handleAction();
+});
+
+pauseToggleButton.addEventListener("click", () => {
+  togglePause();
 });
 
 let lastTimestamp = performance.now();
