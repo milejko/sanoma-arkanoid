@@ -76,3 +76,5 @@ Plik utrzymywany na bieżąco. Każde kolejne polecenie użytkownika w tej sesji
 70. `dobra wprowadzilem drobna zmiane z kontrolkami dla mobile - ona nie ma sensu wycofaj ja`
 71. `ok, zapomniales zaktualizowac history.md`
 72. `kolejna rzecz backend dla leaderboardu, zrobmy to na Google API w oparciu o arkusz kalkulacyjny, ktory jest udostepniony tu: https://docs.google.com/spreadsheets/d/1UaBU1XSWbO0gaPoZ6Xfx3qUPzQaZUZ92T-s9lPSnDo8/edit?usp=sharing`
+73. `bug: na mobile logo / HUD zakrywaja cegly`
+74. `usu prosze dynamiczna zmiane ilosci kafli zostawiamy 5x10`

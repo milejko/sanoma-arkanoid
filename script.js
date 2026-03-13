@@ -3,6 +3,7 @@ const context = canvas.getContext("2d");
 const scoreElement = document.getElementById("score");
 const livesElement = document.getElementById("lives");
 const levelElement = document.getElementById("level");
+const topChromeElement = document.querySelector(".top-chrome");
 const leaderboardOverlay = document.getElementById("leaderboardOverlay");
 const leaderboardTitleElement = document.getElementById("leaderboardTitle");
 const leaderboardSubtitleElement = document.getElementById("leaderboardSubtitle");
@@ -75,11 +76,19 @@ const brickConfig = {
 };
 
 function getBrickRows() {
-  return 4 + Math.round((game.level - 1) / 4);
+  return 5;
 }
 
 function getBrickColumns() {
-  return 8 + Math.round((game.level - 1) / 2);
+  return 10;
+}
+
+function getBrickTopOffset() {
+  const chromeBottom = topChromeElement
+    ? Math.ceil(topChromeElement.getBoundingClientRect().bottom)
+    : 0;
+
+  return Math.max(brickConfig.topOffset, chromeBottom + 20);
 }
 
 const bonusCatalog = {
@@ -528,6 +537,7 @@ function layoutBricks() {
   }
 
   const columns = getBrickColumns();
+  const topOffset = getBrickTopOffset();
   const totalGapWidth = brickConfig.gap * (columns - 1);
   const availableWidth = Math.max(
     canvas.width - brickConfig.sidePadding * 2,
@@ -539,8 +549,7 @@ function layoutBricks() {
   for (const brick of bricks) {
     brick.width = brickWidth;
     brick.x = startX + brick.column * (brickWidth + brickConfig.gap);
-    brick.y =
-      brickConfig.topOffset + brick.row * (brickConfig.height + brickConfig.gap);
+    brick.y = topOffset + brick.row * (brickConfig.height + brickConfig.gap);
   }
 }
 
