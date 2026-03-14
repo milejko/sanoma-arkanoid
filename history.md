@@ -118,3 +118,4 @@ Plik utrzymywany na bieżąco. Każde kolejne polecenie użytkownika w tej sesji
 112. `wysokosc kanwy`
 113. `u dolu ucina`
 114. `teraz jest totalnie zle na safari`
+115. `na safari na komputerze jest ok, na iphone kanwa jest za wysoka (od dolu), i za szeroka`

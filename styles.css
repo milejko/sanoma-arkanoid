@@ -4,6 +4,7 @@
   --chrome-left-gap: max(1rem, env(safe-area-inset-left));
   --chrome-right-gap: max(1rem, env(safe-area-inset-right));
   --viewport-bottom-gap: max(0.85rem, env(safe-area-inset-bottom));
+  --viewport-width: 100vw;
   --viewport-height: 100vh;
 }
 
@@ -25,14 +26,20 @@ canvas {
   position: fixed;
   top: 0;
   left: var(--chrome-left-gap);
-  width: calc(100vw - var(--chrome-left-gap) - var(--chrome-right-gap));
+  width: calc(var(--viewport-width) - var(--chrome-left-gap) - var(--chrome-right-gap));
   height: calc(var(--viewport-height) - var(--viewport-bottom-gap));
   display: block;
 }
 
-@supports (height: 100dvh) {
+@supports (width: 100svw) {
   :root {
-    --viewport-height: 100dvh;
+    --viewport-width: 100svw;
+  }
+}
+
+@supports (height: 100svh) {
+  :root {
+    --viewport-height: 100svh;
   }
 }
 
