@@ -129,3 +129,5 @@ Plik utrzymywany na bieżąco. Każde kolejne polecenie użytkownika w tej sesji
 123. `startowo paletka + 10% dlugosci`
 124. `dostosuj predkosc pilki zaleznie od "przerwy" miedzy paletka a dolnym rzedem kafli - im wieksza odleglosc tym szybsza pilka`
 125. `nie do konca o to chodzi - chodzi o to zeby na pionowych ekranach pilka byla szybsza niz na poziomych`
+126. `do hiscore piktogram czy komorka czy komputer czy tablet - zgadywane na podstawie rozdzielczosci`
+127. `typ dajmy do ostatniej kolumny`

@@ -24,6 +24,7 @@ function doPost(event) {
 
     sheet.appendRow([
       entry.name,
+      entry.deviceType,
       entry.level,
       entry.score,
       new Date().toISOString(),
@@ -61,6 +62,7 @@ function normalizeEntry_(entry) {
   }
 
   const name = sanitizePlayerName_(typeof entry.name === "string" ? entry.name : "");
+  const deviceType = normalizeDeviceType_(entry.deviceType);
   const level = Math.max(1, Math.floor(Number(entry.level)));
   const score = Math.max(0, Math.floor(Number(entry.score)));
 
@@ -70,9 +72,16 @@ function normalizeEntry_(entry) {
 
   return {
     name: name || "ANONIM",
+    deviceType: deviceType,
     level,
     score,
   };
+}
+
+function normalizeDeviceType_(deviceType) {
+  return deviceType === "phone" || deviceType === "tablet" || deviceType === "computer"
+    ? deviceType
+    : "computer";
 }
 
 function sanitizePlayerName_(name) {
@@ -87,8 +96,12 @@ function normalizeRow_(row) {
   try {
     return normalizeEntry_({
       name: row[0],
-      level: row[1],
-      score: row[2],
+      deviceType:
+        Array.isArray(row) && row.length >= 5
+          ? row[1]
+          : "computer",
+      level: Array.isArray(row) && row.length >= 5 ? row[2] : row[1],
+      score: Array.isArray(row) && row.length >= 5 ? row[3] : row[2],
     });
   } catch (error) {
     return null;

@@ -29,7 +29,7 @@ const controls = {
 };
 
 const LEADERBOARD_API_URL =
-  "https://script.google.com/macros/s/AKfycbxWd5-hm3rPJfLQKGG-sE76EJwuNa_e_QmULWgmPK0yZnfXRwLu7Td24FgnRwUFfZoy/exec";
+  "https://script.google.com/macros/s/AKfycbwjoeNIwfr1osYeAE5jLy_69eaVCosVN-KQcaLQ4VDIKmrnK6LZ6t1_RynHlwnk1wec/exec";
 const MAX_HIGH_SCORES = 10;
 const LEADERBOARD_CACHE_KEY = "sanoma-arkanoid-leaderboard-cache";
 const PADDLE_BOTTOM_OFFSET = 66;
@@ -181,6 +181,55 @@ function sanitizePlayerName(name) {
   return name.replace(/\s+/g, " ").trim().slice(0, 10).toUpperCase();
 }
 
+function normalizeDeviceType(deviceType) {
+  if (deviceType === "phone" || deviceType === "tablet" || deviceType === "computer") {
+    return deviceType;
+  }
+
+  return "computer";
+}
+
+function detectDeviceTypeFromResolution() {
+  const screenWidth = Number(window.screen && window.screen.width) || window.innerWidth || canvas.width || 0;
+  const screenHeight =
+    Number(window.screen && window.screen.height) || window.innerHeight || canvas.height || 0;
+  const shortestSide = Math.min(screenWidth, screenHeight);
+
+  if (shortestSide > 0 && shortestSide < 600) {
+    return "phone";
+  }
+
+  if (shortestSide > 0 && shortestSide < 900) {
+    return "tablet";
+  }
+
+  return "computer";
+}
+
+function getDeviceTypeLabel(deviceType) {
+  if (deviceType === "phone") {
+    return "Telefon";
+  }
+
+  if (deviceType === "tablet") {
+    return "Tablet";
+  }
+
+  return "Komputer";
+}
+
+function getDeviceTypeIcon(deviceType) {
+  if (deviceType === "phone") {
+    return "📱";
+  }
+
+  if (deviceType === "tablet") {
+    return "▭";
+  }
+
+  return "💻";
+}
+
 function sortHighScores(first, second) {
   return second.score - first.score || second.level - first.level || first.name.localeCompare(second.name);
 }
@@ -200,6 +249,7 @@ function normalizeHighScoreEntry(entry) {
 
   return {
     name: name || "ANONIM",
+    deviceType: normalizeDeviceType(entry.deviceType),
     level,
     score,
   };
@@ -458,15 +508,20 @@ function renderHighScores() {
 
   for (const entry of highScores) {
     const row = document.createElement("tr");
+    const deviceCell = document.createElement("td");
     const nameCell = document.createElement("td");
     const levelCell = document.createElement("td");
     const scoreCell = document.createElement("td");
 
+    deviceCell.className = "leaderboard-table-device";
+    deviceCell.textContent = getDeviceTypeIcon(entry.deviceType);
+    deviceCell.setAttribute("aria-label", getDeviceTypeLabel(entry.deviceType));
+    deviceCell.title = getDeviceTypeLabel(entry.deviceType);
     nameCell.textContent = entry.name;
     levelCell.textContent = String(entry.level);
     scoreCell.textContent = String(entry.score);
 
-    row.append(nameCell, levelCell, scoreCell);
+    row.append(nameCell, levelCell, scoreCell, deviceCell);
     leaderboardBodyElement.appendChild(row);
   }
 }
@@ -604,6 +659,7 @@ function hideLeaderboard() {
 async function saveCurrentScore() {
   const entry = normalizeHighScoreEntry({
     name: playerNameInput.value,
+    deviceType: detectDeviceTypeFromResolution(),
     level: game.level,
     score: game.score,
   });

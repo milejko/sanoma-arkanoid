@@ -505,6 +505,12 @@ canvas {
   text-align: left;
 }
 
+.leaderboard-table-device {
+  width: 3rem;
+  text-align: center !important;
+  font-size: 1.05rem;
+}
+
 .leaderboard-table thead {
   background: rgba(30, 41, 59, 0.9);
 }
