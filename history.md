@@ -124,3 +124,4 @@ Plik utrzymywany na bieżąco. Każde kolejne polecenie użytkownika w tej sesji
 118. `na mniejszych ekranach hiscore ze scrollem - widoczne 5 pierwszych pozycji`
 119. `wyswietlamy (nawet na desktopie) tylko 10 wynikow, jesli nowy wynik jest gorszy niz w pierwszej 10tce, wyswietlamy tylko hi-score bez opcji wpisu`
 120. `2x bug: 1. kanwa jest odrobine za szeroka na iphone (ucina kafle z prawej) 2. nie dziala scroll hi-score na iphone`
+121. `2 usprawnienia - niech style.css i script.js beda dynamicznie zalezec od wersji (zeby uniknac stale cache)`

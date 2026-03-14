@@ -4,7 +4,22 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <title>Sanoma Arkanoid</title>
-    <link rel="stylesheet" href="styles.css" />
+    <script>
+      (() => {
+        const historyEntryNumber = 121;
+        const major = Math.floor(historyEntryNumber / 100);
+        const minor = Math.floor((historyEntryNumber % 100) / 10);
+        const patch = historyEntryNumber % 10;
+        const version = `${major}.${minor}.${patch}`;
+        window.APP_HISTORY_ENTRY_NUMBER = historyEntryNumber;
+        window.APP_VERSION = version;
+
+        const stylesheet = document.createElement("link");
+        stylesheet.rel = "stylesheet";
+        stylesheet.href = `styles.css?v=${encodeURIComponent(version)}`;
+        document.head.appendChild(stylesheet);
+      })();
+    </script>
   </head>
   <body>
     <div class="top-chrome">
@@ -123,8 +138,14 @@
     </div>
 
     <canvas id="scene" aria-label="Gra w stylu Arkanoid"></canvas>
-    <div class="version-badge" id="versionBadge" aria-label="Wersja gry">1.1.6</div>
+    <div class="version-badge" id="versionBadge" aria-label="Wersja gry">1.2.1</div>
 
-    <script src="script.js"></script>
+    <script>
+      (() => {
+        const appScript = document.createElement("script");
+        appScript.src = `script.js?v=${encodeURIComponent(window.APP_VERSION || "0.0.0")}`;
+        document.body.appendChild(appScript);
+      })();
+    </script>
   </body>
 </html>

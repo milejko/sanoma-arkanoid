@@ -33,7 +33,6 @@ const LEADERBOARD_API_URL =
 const MAX_HIGH_SCORES = 10;
 const LEADERBOARD_CACHE_KEY = "sanoma-arkanoid-leaderboard-cache";
 const PADDLE_BOTTOM_OFFSET = 66;
-const HISTORY_ENTRY_NUMBER = 120;
 
 function formatVersionFromHistoryEntry(entryNumber) {
   const major = Math.floor(entryNumber / 100);
@@ -42,8 +41,16 @@ function formatVersionFromHistoryEntry(entryNumber) {
   return `${major}.${minor}.${patch}`;
 }
 
+const HISTORY_ENTRY_NUMBER = Number.isFinite(Number(window.APP_HISTORY_ENTRY_NUMBER))
+  ? Math.max(0, Math.floor(Number(window.APP_HISTORY_ENTRY_NUMBER)))
+  : 0;
+const APP_VERSION =
+  typeof window.APP_VERSION === "string" && window.APP_VERSION
+    ? window.APP_VERSION
+    : formatVersionFromHistoryEntry(HISTORY_ENTRY_NUMBER);
+
 if (versionBadgeElement) {
-  versionBadgeElement.textContent = formatVersionFromHistoryEntry(HISTORY_ENTRY_NUMBER);
+  versionBadgeElement.textContent = APP_VERSION;
 }
 
 const leaderboardState = {
