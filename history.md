@@ -192,3 +192,5 @@ Plik utrzymywany na bieżąco. Każde kolejne polecenie użytkownika w tej sesji
 185. `fix: rezygnujemy z udawanego efektu; prawdziwe pole gry jest mniejsze o 4px z kazdej strony wewnatrz kanwy`
 186. `2 fixy: zostawiamy tylko zewnetrzna obwodke planszy bez wewnetrznej widocznej ramki; rakietka wraca na dol planszy`
 187. `fix: logo Arkanoid jest odrobine wieksze i ma spokojny bialy blask zamiast teczowego efektu`
+188. `fix: kafle startuja od piatego rzedu siatki`
+189. `fix: cofamy start kafli na drugi rzad siatki`

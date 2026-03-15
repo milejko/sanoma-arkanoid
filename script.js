@@ -38,7 +38,7 @@ const CANVAS_EDGE_MARGIN = 12;
 const GRID_COLUMNS = 8;
 const GRID_ROWS = 26;
 const BRICK_ROW_COUNT = 5;
-const BRICK_START_ROW = 2;
+const BRICK_START_ROW = 1;
 const PLAYFIELD_INSET = 4;
 
 function formatVersionFromHistoryEntry(entryNumber) {

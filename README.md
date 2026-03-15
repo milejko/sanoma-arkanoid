@@ -22,7 +22,7 @@ Projekt powstał jako statyczna aplikacja front-endowa:
 - betonowe i diamentowe cegły wymagające wielu trafień na wyższych poziomach,
 - system bonusów pozytywnych i negatywnych,
 - syntetyczne efekty dźwiękowe w kosmicznym stylu, w tym osobne SFX dla dobrych i złych bonusów,
-- pauza uruchamiana klawiszem `P` lub kliknięciem logo,
+- pauza uruchamiana klawiszem `P` oraz automatycznie po utracie fokusu karty,
 - tablica wyników z limitem **top 10**,
 - lokalna kopia hi-score w `localStorage`,
 - synchronizacja wyników z Google Sheets przez Google Apps Script,
@@ -41,8 +41,10 @@ Cel jest prosty: odbijaj piłkę, niszcz cegły i nie pozwól jej spaść pod pa
 - **Betonowe kafle** pojawiają się od poziomu `3` w liczbie `2` i podwajają się co `3` poziomy.
 - **Kryształowe kafle** pojawiają się od poziomu `4` w liczbie `1` i podwajają się co `4` poziomy.
 - Kanwa gry jest zawsze kwadratowa, a układ opiera się na siatce `8` kolumn i `26` rzędów.
-- Kafle wypełniają szerokość kanwy bez marginesów, a pięć rzędów cegieł zaczyna się od `2.` rzędu siatki.
+- Wewnątrz kanwy pole gry jest minimalnie mniejsze (`4px` inset z każdej strony), dzięki czemu zewnętrzna obwódka planszy pozostaje czytelna.
+- Kafle mają subtelny odstęp między sobą, a pięć rzędów cegieł zaczyna się od `2.` rzędu siatki.
 - Startowa paletka ma szerokość `1` kafla i wysokość `1/2` kafla.
+- Paletka startowo wisi w dolnym rzędzie aktywnego pola gry.
 - Plansza ma też progresję **niezniszczalnych jasnoszarych ścian**; startują od poziomu 3 i są dokładane pojedynczo co 3 levele w dolnym rzędzie layoutu.
 - Po utracie życia aktywne bonusy znikają.
 - Po zakończeniu gry możesz zapisać wynik, ale tylko wtedy, gdy trafia do **pierwszej dziesiątki**.
@@ -60,7 +62,6 @@ Cel jest prosty: odbijaj piłkę, niszcz cegły i nie pozwól jej spaść pod pa
 
 - ruch kursora lub palca steruje pozycją paletki,
 - kliknięcie / tap uruchamia akcję,
-- kliknięcie logo działa jako pauza,
 - na ekranach mobilnych overlay tablicy wyników przewija się dotykiem.
 
 ## Bonusy
