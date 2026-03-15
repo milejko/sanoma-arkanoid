@@ -6,7 +6,7 @@
     <title>Sanoma Arkanoid</title>
     <script>
       (() => {
-        const historyEntryNumber = 161;
+        const historyEntryNumber = 171;
         const major = Math.floor(historyEntryNumber / 100);
         const minor = Math.floor((historyEntryNumber % 100) / 10);
         const patch = historyEntryNumber % 10;
@@ -138,7 +138,7 @@
       </section>
     </div>
 
-    <canvas id="scene" aria-label="Gra w stylu Arkanoid"></canvas>
+    <canvas id="scene" aria-label="Gra w stylu Arkanoid" draggable="false"></canvas>
     <div class="version-badge" id="versionBadge" aria-label="Wersja gry">1.4.0</div>
 
     <script>

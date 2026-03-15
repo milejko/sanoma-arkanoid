@@ -165,3 +165,13 @@ Plik utrzymywany na bieżąco. Każde kolejne polecenie użytkownika w tej sesji
 159. `2x fix: kanwa wycentrowana takze w pionie w dostepnej przestrzeni, a tap/click pod kanwa na iPhonie tez uruchamia akcje/strzal`
 160. `bazowa predkosc pilki +10%`
 161. `predkosc spadania bonusow skorelowana z predkoscia pilki`
+162. `kafli zwyczajnych skrywajacych bonusy jest dokladnie tyle ile bonusow standardowych; na kazdej planszy kazdy taki bonus wystepuje tylko raz`
+163. `fix: klikanie/tap poza kanwa tez powoduje strzal z armaty`
+164. `tlo calej aplikacji ma ten sam kolor co obecna kanwa gry`
+165. `usuwamy shrinkthird`
+166. `kolory tla aplikacji i kanwy sa takie same; wspolny gradient od ciemnego u gory do ok. 15% jasniejszego na dole`
+167. `usunmy gradient - tlo body takie samo jak ciemniejszy kolor kanwy`
+168. `fix: usun mozliwosc zaznaczania kanwy`
+169. `fix: blokujemy dragstart/selectstart kanwy, bo po zaznaczaniu gra wygladala jakby znikala`
+170. `fix: mocniej blokujemy domyslne akcje touch/pointer/contextmenu na kanwie, bo poprzednia blokada nie wystarczyla`
+171. `fix: tlo samej kanwy tez jest jednolite i takie samo jak tlo body`

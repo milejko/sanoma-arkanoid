@@ -6,6 +6,8 @@
   --viewport-bottom-gap: max(0.85rem, env(safe-area-inset-bottom));
   --viewport-width: 100vw;
   --viewport-height: 100vh;
+  --playfield-bg-top: #0f172a;
+  --playfield-bg-bottom: #1e293b;
 }
 
 * {
@@ -16,9 +18,7 @@ body {
   margin: 0;
   overflow: hidden;
   font-family: Arial, sans-serif;
-  background:
-    radial-gradient(circle at top, rgba(59, 130, 246, 0.35), transparent 35%),
-    linear-gradient(180deg, #111827, #020617);
+  background: var(--playfield-bg-top);
   color: #e2e8f0;
 }
 
@@ -27,6 +27,12 @@ canvas {
   top: 0;
   left: 0;
   display: block;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+  -webkit-user-drag: none;
+  -webkit-tap-highlight-color: transparent;
 }
 
 @supports (width: 100svw) {

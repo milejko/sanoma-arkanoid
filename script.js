@@ -27,6 +27,8 @@ const controls = {
   left: false,
   right: false,
 };
+let lastOutsideCanvasActionAt = 0;
+let lastCanvasTouchActionAt = 0;
 
 const LEADERBOARD_API_URL =
   "https://script.google.com/macros/s/AKfycbwjoeNIwfr1osYeAE5jLy_69eaVCosVN-KQcaLQ4VDIKmrnK6LZ6t1_RynHlwnk1wec/exec";
@@ -329,6 +331,11 @@ function getCssPixelValue(variableName, fallback = 0) {
   return Number.isFinite(parsedValue) ? parsedValue : fallback;
 }
 
+function getCssColorValue(variableName, fallback) {
+  const rawValue = getComputedStyle(document.documentElement).getPropertyValue(variableName).trim();
+  return rawValue || fallback;
+}
+
 function getCanvasMetrics() {
   const leftInset = getCssPixelValue("--chrome-left-gap");
   const rightInset = getCssPixelValue("--chrome-right-gap");
@@ -433,11 +440,6 @@ const bonusCatalog = {
     symbol: "-",
     color: "#f87171",
   },
-  shrinkThird: {
-    label: "Paletka -50%",
-    symbol: "=",
-    color: "#fb7185",
-  },
   speedDouble: {
     label: "Piłka -50%",
     symbol: ">",
@@ -451,7 +453,7 @@ const bonusCatalog = {
 };
 
 const positiveBonusTypes = ["widen", "sticky", "shooter", "extraLife", "speedDouble", "superBall", "crystalCombo"];
-const standardNegativeBonusTypes = ["shrinkHalf", "shrinkThird", "speedTriple"];
+const standardNegativeBonusTypes = ["shrinkHalf", "speedTriple"];
 const negativeBonusTypes = [...standardNegativeBonusTypes, "suddenDeath", "pingPong"];
 const superBonusTypes = ["extraLife", "suddenDeath", "superBall", "pingPong", "crystalCombo"];
 const standardBonusTypes = ["widen", "sticky", "shooter", ...standardNegativeBonusTypes];
@@ -1150,19 +1152,20 @@ function createBricks() {
 
   const shuffledIndices = shuffleArray(Array.from({ length: bricks.length }, (_, index) => index));
   const standardBonusCount = Math.min(standardBonusTypes.length, bricks.length);
-  const durableSlotCount = Math.max(0, bricks.length - standardBonusCount);
+  const standardBonusIndices = shuffledIndices.slice(0, standardBonusCount);
+  const durableCandidateIndices = shuffledIndices.slice(standardBonusCount);
+  const durableSlotCount = durableCandidateIndices.length;
   const crystalCount = Math.min(getDoublingBrickCount(4, 4, 1), durableSlotCount);
   const remainingAfterCrystal = Math.max(0, durableSlotCount - crystalCount);
   const concreteCount = Math.min(getDoublingBrickCount(3, 3, 2), remainingAfterCrystal);
   const remainingAfterConcrete = Math.max(0, remainingAfterCrystal - concreteCount);
   const brickCount = Math.min(getDoublingBrickCount(2, 2, 2), remainingAfterConcrete);
-  const crystalIndices = shuffledIndices.slice(0, crystalCount);
-  const concreteIndices = shuffledIndices.slice(crystalCount, crystalCount + concreteCount);
-  const brickIndices = shuffledIndices.slice(
+  const crystalIndices = durableCandidateIndices.slice(0, crystalCount);
+  const concreteIndices = durableCandidateIndices.slice(crystalCount, crystalCount + concreteCount);
+  const brickIndices = durableCandidateIndices.slice(
     crystalCount + concreteCount,
     crystalCount + concreteCount + brickCount
   );
-  const standardBonusIndices = shuffledIndices.slice(crystalCount + concreteCount + brickCount);
   const shuffledStandardBonusTypes = shuffleArray([...standardBonusTypes]);
   const brickSuperBonusTypes = getBalancedBonusTypes(brickIndices.length, "extraLife", "suddenDeath");
   const concreteSuperBonusTypes = getBalancedBonusTypes(concreteIndices.length, "superBall", "pingPong");
@@ -1717,9 +1720,6 @@ function activateBonus(type) {
   } else if (type === "shrinkHalf") {
     effects.paddleSizeLevel = Math.max(effects.paddleSizeLevel - 1, 0);
     syncPaddleWidth();
-  } else if (type === "shrinkThird") {
-    effects.paddleSizeLevel = Math.max(effects.paddleSizeLevel - 1, 0);
-    syncPaddleWidth();
   } else if (type === "sticky") {
     effects.stickyActive = true;
     effects.stickyTimer = 15;
@@ -1948,11 +1948,7 @@ function updateBall(deltaSeconds) {
 
 function drawBackground() {
   context.clearRect(0, 0, canvas.width, canvas.height);
-
-  const glow = context.createLinearGradient(0, 0, 0, canvas.height);
-  glow.addColorStop(0, "rgba(30, 41, 59, 0.12)");
-  glow.addColorStop(1, "rgba(15, 23, 42, 0.42)");
-  context.fillStyle = glow;
+  context.fillStyle = getCssColorValue("--playfield-bg-top", "#0f172a");
   context.fillRect(0, 0, canvas.width, canvas.height);
 }
 
@@ -2235,7 +2231,7 @@ function drawBonusIcon(type, centerX, centerY, size, isPositive) {
     context.bezierCurveTo(-size * 0.14, -size * 0.04, -size * 0.1, -size * 0.14, 0, -size * 0.2);
     context.closePath();
     context.fill();
-  } else if (type === "shrinkHalf" || type === "shrinkThird") {
+  } else if (type === "shrinkHalf") {
     context.beginPath();
     context.moveTo(-size * 0.38, 0);
     context.lineTo(-size * 0.1, 0);
@@ -2828,8 +2824,28 @@ function isElementWithinActionExclusionZone(target) {
   );
 }
 
+function getEventClientY(event) {
+  if (typeof event.clientY === "number") {
+    return event.clientY;
+  }
+
+  if ("changedTouches" in event && event.changedTouches && event.changedTouches.length > 0) {
+    return event.changedTouches[0].clientY;
+  }
+
+  if ("touches" in event && event.touches && event.touches.length > 0) {
+    return event.touches[0].clientY;
+  }
+
+  return NaN;
+}
+
 function handleBelowCanvasAction(event) {
   if (event.defaultPrevented) {
+    return;
+  }
+
+  if (event.type === "click" && performance.now() - lastOutsideCanvasActionAt < 450) {
     return;
   }
 
@@ -2838,12 +2854,37 @@ function handleBelowCanvasAction(event) {
   }
 
   const canvasRect = canvas.getBoundingClientRect();
-  const pointerY = typeof event.clientY === "number" ? event.clientY : NaN;
+  const pointerY = getEventClientY(event);
 
   if (!Number.isFinite(pointerY) || pointerY <= canvasRect.bottom) {
     return;
   }
 
+  if (event.cancelable) {
+    event.preventDefault();
+  }
+
+  lastOutsideCanvasActionAt = performance.now();
+  handleAction();
+}
+
+function preventCanvasDefault(event) {
+  if (event.cancelable) {
+    event.preventDefault();
+  }
+}
+
+function handleCanvasClickAction(event) {
+  if (performance.now() - lastCanvasTouchActionAt < 450) {
+    return;
+  }
+
+  handleAction();
+}
+
+function handleCanvasTouchAction(event) {
+  preventCanvasDefault(event);
+  lastCanvasTouchActionAt = performance.now();
   handleAction();
 }
 
@@ -2919,7 +2960,15 @@ window.addEventListener(
   },
   { passive: false }
 );
-canvas.addEventListener("click", handleAction);
+canvas.addEventListener("click", handleCanvasClickAction);
+canvas.addEventListener("touchstart", preventCanvasDefault, { passive: false });
+canvas.addEventListener("touchend", handleCanvasTouchAction, { passive: false });
+canvas.addEventListener("pointerdown", preventCanvasDefault);
+canvas.addEventListener("mousedown", preventCanvasDefault);
+canvas.addEventListener("contextmenu", preventCanvasDefault);
+canvas.addEventListener("dragstart", preventCanvasDefault);
+canvas.addEventListener("selectstart", preventCanvasDefault);
+window.addEventListener("touchend", handleBelowCanvasAction, { passive: false });
 window.addEventListener("click", handleBelowCanvasAction);
 window.addEventListener("resize", resizeCanvas);
 

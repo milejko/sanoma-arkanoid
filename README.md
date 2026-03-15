@@ -65,7 +65,7 @@ Cel jest prosty: odbijaj piłkę, niszcz cegły i nie pozwól jej spaść pod pa
 
 ## Bonusy
 
-Standardowe bonusy są ukryte losowo w zwykłych kaflach i wypadają dopiero po ich zniszczeniu. W grze występują zarówno bonusy pozytywne, jak i negatywne. Na każdym poziomie dostępny jest pełny zestaw standardowych bonusów, ale bez **+1 życia** i **super piłki**.
+Standardowe bonusy są ukryte losowo w zwykłych kaflach i wypadają dopiero po ich zniszczeniu. W grze występują zarówno bonusy pozytywne, jak i negatywne. Na każdym poziomie dostępny jest pełny zestaw standardowych bonusów, ale bez **+1 życia** i **super piłki**. Każdy standardowy bonus pojawia się na planszy dokładnie raz i ma przypisany dokładnie jeden zwykły kafel.
 
 Na wyższych poziomach część zwykłych cegieł zastępowana jest przez trzy klasy trwałych bloków. **Ceglane** wymagają `2` trafień i ukrywają sprawiedliwie rozdzielone super-bonusy `+1 życie` oraz `utrata życia`. **Betonowe** wymagają `3` trafień i rozdzielają po równo `fireball` oraz negatywną `piłkę ping-pong`, która podwaja liczbę trafień potrzebnych do zbicia aktywnych kafli. **Kryształowe** wymagają `4` trafień i każdy z nich daje zawsze pozytywny bonus `+1 życie + fireball`. Ściany layoutu startują od poziomu `3` i dokładane są co `3` levele w kolejności: `(7,1)`, `(7,8)`, `(7,2)`, `(7,7)`, `(7,3)`, `(7,6)`, `(7,4)`, `(7,5)`. Po dojściu do pełnego rzędu nic więcej już nie dochodzi. Aktywna **super piłka / fireball** potrafi zniszczyć również te jasnoszare ściany.
 
