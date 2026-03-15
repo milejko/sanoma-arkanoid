@@ -157,3 +157,8 @@ Plik utrzymywany na bieżąco. Każde kolejne polecenie użytkownika w tej sesji
 151. `zmiana layoutu: 1: bez scian, plansza 2: (8,2), (8,7), plansza 3: jak "2", plansza 4: (8,2), (10,2), (8,7), (10,7), plansza 5: jak "4", plansza "6": (8,2), (9,2), (10, 2), (8,7), (9,7), (10,7), plansza 7 jak "6", plansza "8": (8,2), (11,2), (8,7), (11,7), plansza "9" jak 8, plansza 10: (8,2), (9,2), (11, 2), (8,7), (9,7), (11,7), plansza 11 jak 10, 12: (8,2), (9,2), (10, 7), (11, 2), (8,7), (9,7), (10,7) (11,7) kolejne plansze powtarzaja cykl`
 152. `dobra poprawka plansz: plansza 1 - brak scian, 2,3: sciana pojedyncza, 4,5: sciana z 2 klockow, 6,7: sciana z 3 klockow, 8,9: sciana z 4 klockow i potem cykl`
 153. `usun ctrl++`
+154. `Porzadkujemy wytrzymale kafle i super-bonusy: ceglane 2x, od lvl 2 po 2 szt. i x2 co 2 levele, bonusy +1 zycie / utrata zycia; betonowe 3x, od lvl 3 po 2 szt. i x2 co 3 levele, bonusy fireball / pilka pingpongowa; krysztalowe 4x, od lvl 4 po 1 szt. i x2 co 4 levele, zawsze +1 zycie + fireball`
+155. `rework scian - zaczynamy sciany od poziomu 3 najpierw w rzedzie 7 - pozycja (7,1) co 3 poziomy pojawiaja sie kolejne (7,8) potem (7,2), (7,7), (7,3), (7,6), (7,4), (7,5) i na tym sie konczy`
+156. `fix: po utracie zycia wszystkie bonusy negatywne znikaja`
+157. `kanwa zawsze kwadratowa; siatka 8x26, kafle bez marginesow, 5 rzedow kafli od rzedu 2, startowa paletka ma szerokosc 1 kafla i wysokosc pol kafla`
+158. `czyscimy mechanike predkosci - bazowa predkosc pilki ok. 50% nizsza, na mniejszych ekranach jeszcze mniejsza, a przyrost na poziom wynosi 5%`

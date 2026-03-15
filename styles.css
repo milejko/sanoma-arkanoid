@@ -25,9 +25,7 @@ body {
 canvas {
   position: fixed;
   top: 0;
-  left: var(--chrome-left-gap);
-  width: calc(var(--viewport-width) - var(--chrome-left-gap) - var(--chrome-right-gap));
-  height: calc(var(--viewport-height) - var(--viewport-bottom-gap));
+  left: 0;
   display: block;
 }
 

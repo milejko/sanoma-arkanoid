@@ -32,7 +32,11 @@ const LEADERBOARD_API_URL =
   "https://script.google.com/macros/s/AKfycbwjoeNIwfr1osYeAE5jLy_69eaVCosVN-KQcaLQ4VDIKmrnK6LZ6t1_RynHlwnk1wec/exec";
 const MAX_HIGH_SCORES = 10;
 const LEADERBOARD_CACHE_KEY = "sanoma-arkanoid-leaderboard-cache";
-const PADDLE_BOTTOM_OFFSET = 66;
+const CANVAS_EDGE_MARGIN = 12;
+const GRID_COLUMNS = 8;
+const GRID_ROWS = 26;
+const BRICK_ROW_COUNT = 5;
+const BRICK_START_ROW = 1;
 
 function formatVersionFromHistoryEntry(entryNumber) {
   const major = Math.floor(entryNumber / 100);
@@ -108,9 +112,9 @@ const ball = {
 };
 
 const brickConfig = {
-  gap: 5,
-  topOffset: 92,
-  sidePadding: 28,
+  gap: 0,
+  topOffset: 0,
+  sidePadding: 0,
   height: 22,
 };
 
@@ -304,42 +308,81 @@ function playSound(name) {
 }
 
 function getBrickRows() {
-  return 5;
+  return BRICK_ROW_COUNT;
 }
 
 function getBrickColumns() {
-  return 8;
+  return GRID_COLUMNS;
 }
 
-const boardWallHeights = [0, 1, 1, 2, 2, 3, 3, 4, 4];
-
-function buildSideWallLayout(height) {
-  const wallTiles = [];
-
-  for (let offset = 0; offset < height; offset += 1) {
-    wallTiles.push({ row: 7 + offset, column: 1 });
-    wallTiles.push({ row: 7 + offset, column: 6 });
-  }
-
-  return wallTiles;
+function getTileWidth() {
+  return canvas.width / GRID_COLUMNS;
 }
+
+function getTileHeight() {
+  return canvas.height / GRID_ROWS;
+}
+
+function getCssPixelValue(variableName, fallback = 0) {
+  const rawValue = getComputedStyle(document.documentElement).getPropertyValue(variableName).trim();
+  const parsedValue = Number.parseFloat(rawValue);
+  return Number.isFinite(parsedValue) ? parsedValue : fallback;
+}
+
+function getCanvasMetrics() {
+  const leftInset = getCssPixelValue("--chrome-left-gap");
+  const rightInset = getCssPixelValue("--chrome-right-gap");
+  const bottomInset = getCssPixelValue("--viewport-bottom-gap");
+  const chromeBottom = topChromeElement
+    ? Math.ceil(topChromeElement.getBoundingClientRect().bottom)
+    : getCssPixelValue("--chrome-top-gap");
+  const top = chromeBottom + CANVAS_EDGE_MARGIN;
+  const availableWidth = Math.max(
+    0,
+    window.innerWidth - leftInset - rightInset - CANVAS_EDGE_MARGIN * 2
+  );
+  const availableHeight = Math.max(
+    0,
+    window.innerHeight - top - bottomInset - CANVAS_EDGE_MARGIN
+  );
+  const side = Math.floor(Math.max(0, Math.min(availableWidth, availableHeight)));
+  const left = Math.round(
+    leftInset + CANVAS_EDGE_MARGIN + Math.max(0, (availableWidth - side) / 2)
+  );
+
+  return {
+    side,
+    left,
+    top: Math.round(top),
+  };
+}
+
+const wallTileSequence = [
+  { row: 6, column: 0 },
+  { row: 6, column: 7 },
+  { row: 6, column: 1 },
+  { row: 6, column: 6 },
+  { row: 6, column: 2 },
+  { row: 6, column: 5 },
+  { row: 6, column: 3 },
+  { row: 6, column: 4 },
+];
 
 function getLayoutWallTiles() {
-  const layoutIndex = (Math.max(game.level, 1) - 1) % boardWallHeights.length;
-  return buildSideWallLayout(boardWallHeights[layoutIndex]);
+  if (game.level < 3) {
+    return [];
+  }
+
+  const wallCount = Math.min(1 + Math.floor((game.level - 3) / 3), wallTileSequence.length);
+  return wallTileSequence.slice(0, wallCount);
 }
 
 function getPlayfieldTopBoundary() {
-  const chromeBottom = topChromeElement
-    ? Math.ceil(topChromeElement.getBoundingClientRect().bottom)
-    : 0;
-
-  return Math.max(brickConfig.topOffset, chromeBottom + 20);
+  return 0;
 }
 
 function getBrickTopOffset() {
-  const extraTopGap = (brickConfig.height + brickConfig.gap) * 2;
-  return getPlayfieldTopBoundary() + extraTopGap;
+  return getTileHeight() * BRICK_START_ROW;
 }
 
 const bonusCatalog = {
@@ -364,19 +407,24 @@ const bonusCatalog = {
     color: "#f472b6",
   },
   superBall: {
-    label: "Super piłka",
+    label: "Fireball",
     symbol: "*",
     color: "#ef4444",
   },
   suddenDeath: {
-    label: "Nagła śmierć",
+    label: "Utrata życia",
     symbol: "☠",
     color: "#ef4444",
   },
-  resetPaddle: {
-    label: "Reset paletki",
-    symbol: "X",
+  pingPong: {
+    label: "Piłka ping-pong",
+    symbol: "⊘",
     color: "#f87171",
+  },
+  crystalCombo: {
+    label: "+1 życie + fireball",
+    symbol: "♥*",
+    color: "#67e8f9",
   },
   shrinkHalf: {
     label: "Paletka -50%",
@@ -400,12 +448,10 @@ const bonusCatalog = {
   },
 };
 
-const positiveBonusTypes = ["widen", "sticky", "shooter", "extraLife", "speedDouble", "superBall"];
+const positiveBonusTypes = ["widen", "sticky", "shooter", "extraLife", "speedDouble", "superBall", "crystalCombo"];
 const standardNegativeBonusTypes = ["shrinkHalf", "shrinkThird", "speedTriple"];
-const negativeBonusTypes = [...standardNegativeBonusTypes, "suddenDeath", "resetPaddle"];
-const superBonusTypes = ["extraLife", "superBall", "suddenDeath", "resetPaddle"];
-const positiveSuperBonusTypes = ["extraLife", "superBall"];
-const negativeSuperBonusTypes = ["suddenDeath", "resetPaddle"];
+const negativeBonusTypes = [...standardNegativeBonusTypes, "suddenDeath", "pingPong"];
+const superBonusTypes = ["extraLife", "suddenDeath", "superBall", "pingPong", "crystalCombo"];
 const standardBonusTypes = ["widen", "sticky", "shooter", ...standardNegativeBonusTypes];
 
 let highScores = [];
@@ -981,6 +1027,7 @@ const effects = {
   superBallTimer: 0,
   speedModifier: 0,
   speedTimer: 0,
+  pingPongStacks: 0,
   shotCooldown: 0,
 };
 
@@ -989,12 +1036,28 @@ let fallingBonuses = [];
 let projectiles = [];
 let lastPointerMoveTime = 0;
 
-function getDurableBrickCount(startLevel, levelStep) {
+function getDoublingBrickCount(startLevel, levelStep, initialCount) {
   if (game.level < startLevel) {
     return 0;
   }
 
-  return Math.floor((game.level - startLevel) / levelStep) + 1;
+  return initialCount * 2 ** Math.floor((game.level - startLevel) / levelStep);
+}
+
+function getBalancedBonusTypes(count, positiveType, negativeType) {
+  const types = [];
+  const positiveCount = Math.ceil(count / 2);
+  const negativeCount = Math.floor(count / 2);
+
+  for (let index = 0; index < positiveCount; index += 1) {
+    types.push(positiveType);
+  }
+
+  for (let index = 0; index < negativeCount; index += 1) {
+    types.push(negativeType);
+  }
+
+  return shuffleArray(types);
 }
 
 function setBrickMaterial(brick, material) {
@@ -1008,13 +1071,19 @@ function setBrickMaterial(brick, material) {
     return;
   }
 
-  if (material === "diamond") {
+  if (material === "crystal") {
+    brick.hitPoints = 4;
+    brick.maxHitPoints = 4;
+    return;
+  }
+
+  if (material === "concrete") {
     brick.hitPoints = 3;
     brick.maxHitPoints = 3;
     return;
   }
 
-  if (material === "concrete") {
+  if (material === "brick") {
     brick.hitPoints = 2;
     brick.maxHitPoints = 2;
     return;
@@ -1026,12 +1095,21 @@ function setBrickMaterial(brick, material) {
 
 function resizeCanvas() {
   const previousBaseSpeed = getCurrentBallBaseSpeed();
-  const { width, height } = canvas.getBoundingClientRect();
-  canvas.width = Math.floor(width);
-  canvas.height = Math.floor(height);
+  const { side, left, top } = getCanvasMetrics();
+  canvas.style.width = `${side}px`;
+  canvas.style.height = `${side}px`;
+  canvas.style.left = `${left}px`;
+  canvas.style.top = `${top}px`;
+  canvas.width = side;
+  canvas.height = side;
+  brickConfig.height = getTileHeight();
   layoutBricks();
-  paddle.y = canvas.height - PADDLE_BOTTOM_OFFSET;
+  paddle.height = getTileHeight() * 0.5;
+  paddle.speed = getTileWidth() * 19;
+  paddle.y = getPaddleY();
   paddle.baseWidth = getBasePaddleWidth();
+  ball.radius = getBallRadius();
+  ball.baseSpeed = getTileHeight() * 12.5;
   syncPaddleWidth();
   paddle.velocityX = 0;
 
@@ -1052,7 +1130,7 @@ function createBricks() {
   for (let row = 0; row < rows; row += 1) {
     for (let column = 0; column < columns; column += 1) {
       bricks.push({
-        row,
+        row: BRICK_START_ROW + row,
         column,
         alive: true,
         x: 0,
@@ -1071,39 +1149,48 @@ function createBricks() {
   const shuffledIndices = shuffleArray(Array.from({ length: bricks.length }, (_, index) => index));
   const standardBonusCount = Math.min(standardBonusTypes.length, bricks.length);
   const durableSlotCount = Math.max(0, bricks.length - standardBonusCount);
-  const concreteCount = Math.min(getDurableBrickCount(2, 2), durableSlotCount);
-  const diamondCount = Math.min(getDurableBrickCount(3, 3), durableSlotCount - concreteCount);
-  const concreteIndices = shuffledIndices.slice(0, concreteCount);
-  const diamondIndices = shuffledIndices.slice(
-    concreteCount,
-    concreteCount + diamondCount
+  const crystalCount = Math.min(getDoublingBrickCount(4, 4, 1), durableSlotCount);
+  const remainingAfterCrystal = Math.max(0, durableSlotCount - crystalCount);
+  const concreteCount = Math.min(getDoublingBrickCount(3, 3, 2), remainingAfterCrystal);
+  const remainingAfterConcrete = Math.max(0, remainingAfterCrystal - concreteCount);
+  const brickCount = Math.min(getDoublingBrickCount(2, 2, 2), remainingAfterConcrete);
+  const crystalIndices = shuffledIndices.slice(0, crystalCount);
+  const concreteIndices = shuffledIndices.slice(crystalCount, crystalCount + concreteCount);
+  const brickIndices = shuffledIndices.slice(
+    crystalCount + concreteCount,
+    crystalCount + concreteCount + brickCount
   );
-  const standardBonusIndices = shuffledIndices.slice(concreteCount + diamondCount);
+  const standardBonusIndices = shuffledIndices.slice(crystalCount + concreteCount + brickCount);
   const shuffledStandardBonusTypes = shuffleArray([...standardBonusTypes]);
-  const shuffledPositiveSuperBonusTypes = shuffleArray([...positiveSuperBonusTypes]);
-  const shuffledNegativeSuperBonusTypes = shuffleArray([...negativeSuperBonusTypes]);
+  const brickSuperBonusTypes = getBalancedBonusTypes(brickIndices.length, "extraLife", "suddenDeath");
+  const concreteSuperBonusTypes = getBalancedBonusTypes(concreteIndices.length, "superBall", "pingPong");
+
+  for (const brickIndex of crystalIndices) {
+    setBrickMaterial(bricks[brickIndex], "crystal");
+  }
 
   for (const brickIndex of concreteIndices) {
     setBrickMaterial(bricks[brickIndex], "concrete");
   }
 
-  for (const brickIndex of diamondIndices) {
-    setBrickMaterial(bricks[brickIndex], "diamond");
+  for (const brickIndex of brickIndices) {
+    setBrickMaterial(bricks[brickIndex], "brick");
   }
 
   for (let index = 0; index < standardBonusCount; index += 1) {
     bricks[standardBonusIndices[index]].bonusType = shuffledStandardBonusTypes[index];
   }
 
-  const concreteSuperBonusCount = Math.min(concreteIndices.length, shuffledNegativeSuperBonusTypes.length);
-  const diamondSuperBonusCount = Math.min(diamondIndices.length, shuffledPositiveSuperBonusTypes.length);
-
-  for (let index = 0; index < concreteSuperBonusCount; index += 1) {
-    bricks[concreteIndices[index]].bonusType = shuffledNegativeSuperBonusTypes[index];
+  for (let index = 0; index < brickSuperBonusTypes.length; index += 1) {
+    bricks[brickIndices[index]].bonusType = brickSuperBonusTypes[index];
   }
 
-  for (let index = 0; index < diamondSuperBonusCount; index += 1) {
-    bricks[diamondIndices[index]].bonusType = shuffledPositiveSuperBonusTypes[index];
+  for (let index = 0; index < concreteSuperBonusTypes.length; index += 1) {
+    bricks[concreteIndices[index]].bonusType = concreteSuperBonusTypes[index];
+  }
+
+  for (const brickIndex of crystalIndices) {
+    bricks[brickIndex].bonusType = "crystalCombo";
   }
 
   for (const wallTile of getLayoutWallTiles()) {
@@ -1142,8 +1229,9 @@ function layoutBricks() {
 
   for (const brick of bricks) {
     brick.width = brickWidth;
+    brick.height = brickConfig.height;
     brick.x = startX + brick.column * (brickWidth + brickConfig.gap);
-    brick.y = topOffset + brick.row * (brickConfig.height + brickConfig.gap);
+    brick.y = topOffset + (brick.row - BRICK_START_ROW) * (brickConfig.height + brickConfig.gap);
   }
 }
 
@@ -1166,27 +1254,39 @@ function bounceBallFromBrick(previousX, brick) {
 }
 
 function getBasePaddleWidth() {
-  return canvas.width * 0.1386 * getSmallDevicePaddleFactor();
+  return getTileWidth();
 }
 
-function getSmallDevicePaddleFactor() {
-  if (canvas.width <= 0 || canvas.height <= 0) {
-    return 1;
-  }
-
-  const shortestSide = Math.min(canvas.width, canvas.height);
-  return shortestSide <= 480 ? 1.2 : 1;
+function getPaddleY() {
+  return canvas.height - getTileHeight();
 }
 
-function getOrientationBasedBallSpeedFactor() {
-  if (canvas.width <= 0 || canvas.height <= 0) {
-    return 1;
-  }
+function getBallRadius() {
+  return Math.max(5, getTileHeight() * 0.42);
+}
 
-  const aspectRatio = canvas.height / canvas.width;
-  const normalizedRatio = Math.max(0.72, Math.min(1.85, aspectRatio));
+function getBallAttachmentGap() {
+  return Math.max(2, getTileHeight() * 0.12);
+}
 
-  return 0.9 + (normalizedRatio - 0.72) / (1.85 - 0.72) * 0.32;
+function getBonusSize() {
+  return Math.max(16, Math.min(getTileWidth() * 0.65, getTileHeight() * 1.4));
+}
+
+function getBonusFallSpeed() {
+  return getTileHeight() * 11;
+}
+
+function getProjectileWidth() {
+  return Math.max(3, getTileWidth() * 0.08);
+}
+
+function getProjectileHeight() {
+  return Math.max(12, getTileHeight() * 1.05);
+}
+
+function getProjectileSpeed() {
+  return getTileHeight() * 41.5;
 }
 
 function getSmallDeviceBallSpeedFactor() {
@@ -1197,15 +1297,14 @@ function getSmallDeviceBallSpeedFactor() {
   const shortestSide = Math.min(canvas.width, canvas.height);
   const normalizedSide = Math.max(320, Math.min(960, shortestSide));
 
-  return 0.76 + (normalizedSide - 320) / (960 - 320) * 0.24;
+  return 0.56 + (normalizedSide - 320) / (960 - 320) * 0.36;
 }
 
 function getCurrentBallBaseSpeed() {
-  const levelSpeedFactor = 1 + (game.level - 1) * 0.07;
+  const levelSpeedFactor = 1 + (game.level - 1) * 0.05;
   return (
     ball.baseSpeed *
     levelSpeedFactor *
-    getOrientationBasedBallSpeedFactor() *
     getSmallDeviceBallSpeedFactor() *
     (1 + effects.speedModifier)
   );
@@ -1252,7 +1351,7 @@ function syncPaddleWidth() {
     paddle.baseWidth * paddleSizeLevels[effects.paddleSizeLevel],
     canvas.width * 0.62
   );
-  paddle.width = Math.max(38, widenedWidth);
+  paddle.width = Math.max(getTileWidth() * paddleSizeLevels[0], widenedWidth);
   paddle.x = Math.max(
     0,
     Math.min(canvas.width - paddle.width, previousCenter - paddle.width / 2)
@@ -1261,7 +1360,7 @@ function syncPaddleWidth() {
   if (ball.attached) {
     ball.paddleOffsetX = getClampedPaddleOffset(ball.paddleOffsetX);
     ball.x = paddle.x + paddle.width / 2 + ball.paddleOffsetX;
-    ball.y = paddle.y - ball.radius - 2;
+    ball.y = paddle.y - ball.radius - getBallAttachmentGap();
   }
 }
 
@@ -1277,6 +1376,18 @@ function clearEffects({ preservePaddleSizeLevel = false, preserveShooter = false
   effects.superBallTimer = 0;
   effects.speedModifier = 0;
   effects.speedTimer = 0;
+  while (effects.pingPongStacks > 0) {
+    for (const brick of bricks) {
+      if (!brick.alive || brick.destructible === false) {
+        continue;
+      }
+
+      brick.hitPoints = Math.max(1, Math.ceil(brick.hitPoints / 2));
+      brick.maxHitPoints = Math.max(1, Math.ceil(brick.maxHitPoints / 2));
+    }
+
+    effects.pingPongStacks -= 1;
+  }
   effects.shotCooldown = 0;
   syncPaddleWidth();
   updateHud();
@@ -1303,7 +1414,7 @@ function attachBallToPaddle(offsetX = 0, stickyAttachment = false) {
   ball.trail = [];
   ball.paddleOffsetX = getClampedPaddleOffset(offsetX);
   ball.x = paddle.x + paddle.width / 2 + ball.paddleOffsetX;
-  ball.y = paddle.y - ball.radius - 2;
+  ball.y = paddle.y - ball.radius - getBallAttachmentGap();
 }
 
 function launchBall() {
@@ -1336,7 +1447,7 @@ function resetRound() {
   paddle.baseWidth = getBasePaddleWidth();
   syncPaddleWidth();
   paddle.x = (canvas.width - paddle.width) / 2;
-  paddle.y = canvas.height - PADDLE_BOTTOM_OFFSET;
+  paddle.y = getPaddleY();
   paddle.velocityX = 0;
   lastPointerMoveTime = 0;
   attachBallToPaddle(0, false);
@@ -1493,8 +1604,8 @@ function hitBrick(brick, canDestroyWalls = false) {
       type: brick.bonusType,
       x: brick.x + brick.width / 2,
       y: brick.y + brick.height / 2,
-      size: 24,
-      speed: 170,
+      size: getBonusSize(),
+      speed: getBonusFallSpeed(),
       phase: Math.random() * Math.PI * 2,
     });
   }
@@ -1621,18 +1732,20 @@ function activateBonus(type) {
   } else if (type === "suddenDeath") {
     loseLife();
     return;
-  } else if (type === "resetPaddle") {
-    effects.paddleSizeLevel = neutralLevelIndex;
-    effects.stickyActive = false;
-    effects.stickyTimer = 0;
-    effects.shooterActive = false;
-    effects.shooterTimer = 0;
-    syncPaddleWidth();
+  } else if (type === "pingPong") {
+    for (const brick of bricks) {
+      if (!brick.alive || brick.destructible === false) {
+        continue;
+      }
 
-    if (ball.attached && ball.stickyAttachment) {
-      ball.stickyAttachment = false;
-      ball.stickyAutoLaunchTimer = 0;
+      brick.hitPoints *= 2;
+      brick.maxHitPoints *= 2;
     }
+    effects.pingPongStacks += 1;
+  } else if (type === "crystalCombo") {
+    game.lives = Math.min(3, game.lives + 1);
+    effects.superBallActive = true;
+    effects.superBallTimer = 5;
   } else if (type === "speedDouble") {
     const previousSpeedFactor = 1 + effects.speedModifier;
     effects.speedModifier = -0.5;
@@ -1841,6 +1954,11 @@ function drawBackground() {
 }
 
 function drawPaddle() {
+  const insetX = Math.max(1, Math.min(paddle.width * 0.12, 5));
+  const insetY = Math.max(1, Math.min(paddle.height * 0.2, 3));
+  const trimThickness = Math.max(1, Math.min(paddle.height * 0.18, 2));
+  const innerWidth = Math.max(0, paddle.width - insetX * 2);
+  const innerHeight = Math.max(0, paddle.height - insetY * 2);
   const bodyGradient = context.createLinearGradient(
     paddle.x,
     paddle.y,
@@ -1874,39 +1992,56 @@ function drawPaddle() {
   context.shadowOffsetY = 0;
 
   context.fillStyle = "rgba(255, 255, 255, 0.55)";
-  context.fillRect(paddle.x + 5, paddle.y + 3, paddle.width - 10, 2);
-  context.fillRect(paddle.x + 5, paddle.y + 3, 2, paddle.height - 6);
+  context.fillRect(paddle.x + insetX, paddle.y + insetY, innerWidth, trimThickness);
+  context.fillRect(paddle.x + insetX, paddle.y + insetY, trimThickness, innerHeight);
 
   context.fillStyle = "rgba(8, 20, 38, 0.34)";
-  context.fillRect(paddle.x + 5, paddle.y + paddle.height - 4, paddle.width - 10, 2);
-  context.fillRect(paddle.x + paddle.width - 7, paddle.y + 3, 2, paddle.height - 6);
+  context.fillRect(
+    paddle.x + insetX,
+    paddle.y + paddle.height - insetY - trimThickness,
+    innerWidth,
+    trimThickness
+  );
+  context.fillRect(
+    paddle.x + paddle.width - insetX - trimThickness,
+    paddle.y + insetY,
+    trimThickness,
+    innerHeight
+  );
 
   const inset = context.createLinearGradient(
-    paddle.x + 4,
-    paddle.y + 3,
-    paddle.x + paddle.width - 4,
-    paddle.y + paddle.height - 3
+    paddle.x + insetX,
+    paddle.y + insetY,
+    paddle.x + paddle.width - insetX,
+    paddle.y + paddle.height - insetY
   );
   inset.addColorStop(0, "rgba(255, 255, 255, 0.28)");
   inset.addColorStop(0.45, "rgba(255, 255, 255, 0.08)");
   inset.addColorStop(1, "rgba(8, 20, 38, 0.14)");
   context.fillStyle = inset;
-  context.fillRect(paddle.x + 4, paddle.y + 3, paddle.width - 8, paddle.height - 6);
+  context.fillRect(paddle.x + insetX, paddle.y + insetY, innerWidth, innerHeight);
 
   context.strokeStyle = "rgba(255, 255, 255, 0.22)";
   context.lineWidth = 1;
   context.strokeRect(paddle.x, paddle.y, paddle.width, paddle.height);
 
   if (isShooter) {
-    const cannonBaseWidth = 14;
-    const cannonCoreWidth = 6;
+    const cannonBaseWidth = Math.max(8, Math.min(14, paddle.width * 0.32));
+    const cannonCoreWidth = Math.max(4, Math.min(6, paddle.width * 0.14));
+    const cannonBaseHeight = Math.max(4, Math.min(7, getTileHeight() * 0.45));
+    const cannonCoreHeight = Math.max(6, Math.min(8, getTileHeight() * 0.52));
     const cannonBaseX = paddle.x + paddle.width / 2 - cannonBaseWidth / 2;
     const cannonCoreX = paddle.x + paddle.width / 2 - cannonCoreWidth / 2;
 
     context.fillStyle = "#cbd5e1";
-    context.fillRect(cannonBaseX, paddle.y - 7, cannonBaseWidth, 7);
+    context.fillRect(cannonBaseX, paddle.y - cannonBaseHeight, cannonBaseWidth, cannonBaseHeight);
     context.fillStyle = "#38bdf8";
-    context.fillRect(cannonCoreX, paddle.y - 11, cannonCoreWidth, 8);
+    context.fillRect(
+      cannonCoreX,
+      paddle.y - cannonBaseHeight - cannonCoreHeight * 0.85,
+      cannonCoreWidth,
+      cannonCoreHeight
+    );
   }
 
   context.shadowBlur = 0;
@@ -2160,6 +2295,36 @@ function drawBonusIcon(type, centerX, centerY, size, isPositive) {
     context.moveTo(-size * 0.06, size * 0.08);
     context.quadraticCurveTo(0, size * 0.13, size * 0.06, size * 0.08);
     context.stroke();
+  } else if (type === "pingPong") {
+    context.beginPath();
+    context.arc(0, 0, size * 0.24, 0, Math.PI * 2);
+    context.stroke();
+    context.beginPath();
+    context.moveTo(-size * 0.18, -size * 0.18);
+    context.lineTo(size * 0.18, size * 0.18);
+    context.stroke();
+  } else if (type === "crystalCombo") {
+    context.beginPath();
+    context.moveTo(-size * 0.18, size * 0.18);
+    context.bezierCurveTo(size * 0.04, 0, size * 0.12, -size * 0.14, 0, -size * 0.2);
+    context.bezierCurveTo(-size * 0.08, -size * 0.3, -size * 0.24, -size * 0.22, -size * 0.18, -size * 0.08);
+    context.bezierCurveTo(-size * 0.28, 0, -size * 0.26, size * 0.14, -size * 0.18, size * 0.18);
+    context.closePath();
+    context.fill();
+    context.save();
+    context.translate(size * 0.14, -size * 0.02);
+    context.scale(0.68, 0.68);
+    context.fillStyle = "#ff5a1f";
+    context.beginPath();
+    context.moveTo(0, -size * 0.28);
+    context.bezierCurveTo(size * 0.16, -size * 0.22, size * 0.2, -size * 0.04, size * 0.12, size * 0.08);
+    context.bezierCurveTo(size * 0.22, 0, size * 0.26, size * 0.18, size * 0.08, size * 0.26);
+    context.bezierCurveTo(0, size * 0.18, -size * 0.02, size * 0.14, 0, size * 0.04);
+    context.bezierCurveTo(-size * 0.04, size * 0.16, -size * 0.2, size * 0.18, -size * 0.16, size * 0.02);
+    context.bezierCurveTo(-size * 0.22, -size * 0.04, -size * 0.16, -size * 0.18, 0, -size * 0.28);
+    context.closePath();
+    context.fill();
+    context.restore();
   } else if (type === "resetPaddle") {
     context.beginPath();
     context.moveTo(-size * 0.22, -size * 0.22);
@@ -2254,23 +2419,27 @@ function drawProjectiles() {
 
 function drawBricks() {
   const rowColors = ["#ff7a18", "#ff3d81", "#8b5cff", "#39ff88", "#21d4fd"];
-  const bevel = 4;
+  const bevel = Math.max(1.5, Math.min(getTileHeight() * 0.22, 4));
 
   for (const brick of bricks) {
     if (!brick.alive) {
       continue;
     }
 
+    const isBrickBrick = brick.material === "brick";
     const isConcreteBrick = brick.material === "concrete";
-    const isDiamondBrick = brick.material === "diamond";
+    const isCrystalBrick = brick.material === "crystal";
     const isWallBrick = brick.material === "wall";
+    const colorRow = Math.max(0, brick.row - BRICK_START_ROW);
     const baseColor = isWallBrick
         ? "#d1d5db"
-        : isDiamondBrick
+        : isCrystalBrick
         ? "#67e8f9"
         : isConcreteBrick
         ? "#6b7280"
-        : rowColors[brick.row % rowColors.length];
+        : isBrickBrick
+        ? "#c2410c"
+        : rowColors[colorRow % rowColors.length];
     const face = context.createLinearGradient(
       brick.x,
       brick.y,
@@ -2281,32 +2450,38 @@ function drawBricks() {
       0,
       isWallBrick
           ? "rgba(255, 255, 255, 0.62)"
-          : isDiamondBrick
+          : isCrystalBrick
           ? "rgba(240, 253, 255, 0.56)"
           : isConcreteBrick
           ? "rgba(255, 255, 255, 0.28)"
+          : isBrickBrick
+          ? "rgba(255, 237, 213, 0.38)"
           : "rgba(255, 255, 255, 0.34)"
     );
     face.addColorStop(0.15, baseColor);
     face.addColorStop(0.48, baseColor);
-    face.addColorStop(0.72, isDiamondBrick ? "#22d3ee" : baseColor);
+    face.addColorStop(0.72, isCrystalBrick ? "#22d3ee" : isBrickBrick ? "#ea580c" : baseColor);
     face.addColorStop(
       1,
       isWallBrick
           ? "rgba(100, 116, 139, 0.34)"
-          : isDiamondBrick
+          : isCrystalBrick
           ? "rgba(8, 47, 73, 0.4)"
           : isConcreteBrick
           ? "rgba(31, 41, 55, 0.38)"
+          : isBrickBrick
+          ? "rgba(124, 45, 18, 0.36)"
           : "rgba(10, 14, 28, 0.32)"
     );
 
     context.shadowColor = isWallBrick
         ? "rgba(226, 232, 240, 0.4)"
-        : isDiamondBrick
+        : isCrystalBrick
         ? "rgba(34, 211, 238, 0.45)"
         : isConcreteBrick
         ? "rgba(107, 114, 128, 0.42)"
+        : isBrickBrick
+        ? "rgba(194, 65, 12, 0.4)"
         : `${baseColor}66`;
     context.shadowBlur = 14;
     context.shadowOffsetY = 4;
@@ -2317,20 +2492,24 @@ function drawBricks() {
 
     context.fillStyle = isWallBrick
         ? "rgba(255, 255, 255, 0.58)"
-        : isDiamondBrick
+        : isCrystalBrick
         ? "rgba(240, 253, 255, 0.56)"
         : isConcreteBrick
         ? "rgba(255, 255, 255, 0.32)"
+        : isBrickBrick
+        ? "rgba(255, 237, 213, 0.42)"
         : "rgba(255, 255, 255, 0.45)";
     context.fillRect(brick.x + bevel, brick.y + bevel, brick.width - bevel * 2, 2);
     context.fillRect(brick.x + bevel, brick.y + bevel, 2, brick.height - bevel * 2);
 
     context.fillStyle = isWallBrick
         ? "rgba(100, 116, 139, 0.28)"
-        : isDiamondBrick
+        : isCrystalBrick
         ? "rgba(8, 47, 73, 0.3)"
         : isConcreteBrick
         ? "rgba(31, 41, 55, 0.34)"
+        : isBrickBrick
+        ? "rgba(124, 45, 18, 0.28)"
         : "rgba(3, 7, 18, 0.3)";
     context.fillRect(
       brick.x + bevel,
@@ -2355,30 +2534,36 @@ function drawBricks() {
       0,
       isWallBrick
           ? "rgba(255, 255, 255, 0.22)"
-          : isDiamondBrick
+          : isCrystalBrick
           ? "rgba(255, 255, 255, 0.3)"
           : isConcreteBrick
           ? "rgba(255, 255, 255, 0.14)"
+          : isBrickBrick
+          ? "rgba(254, 215, 170, 0.18)"
           : "rgba(255, 255, 255, 0.26)"
     );
     inset.addColorStop(
       0.4,
       isWallBrick
           ? "rgba(226, 232, 240, 0.16)"
-          : isDiamondBrick
+          : isCrystalBrick
           ? "rgba(224, 242, 254, 0.18)"
           : isConcreteBrick
           ? "rgba(255, 255, 255, 0.05)"
+          : isBrickBrick
+          ? "rgba(251, 146, 60, 0.1)"
           : "rgba(255, 255, 255, 0.1)"
     );
     inset.addColorStop(
       1,
       isWallBrick
           ? "rgba(148, 163, 184, 0.14)"
-          : isDiamondBrick
+          : isCrystalBrick
           ? "rgba(12, 74, 110, 0.18)"
           : isConcreteBrick
           ? "rgba(15, 23, 42, 0.18)"
+          : isBrickBrick
+          ? "rgba(124, 45, 18, 0.12)"
           : "rgba(4, 10, 24, 0.16)"
     );
     context.fillStyle = inset;
@@ -2388,6 +2573,32 @@ function drawBricks() {
       brick.width - bevel * 2,
       brick.height - bevel * 2
     );
+
+    if (isBrickBrick) {
+      context.strokeStyle = "rgba(255, 237, 213, 0.3)";
+      context.lineWidth = 1;
+      context.beginPath();
+      context.moveTo(brick.x + bevel, brick.y + brick.height * 0.5);
+      context.lineTo(brick.x + brick.width - bevel, brick.y + brick.height * 0.5);
+      context.moveTo(brick.x + brick.width * 0.33, brick.y + bevel);
+      context.lineTo(brick.x + brick.width * 0.33, brick.y + brick.height * 0.5);
+      context.moveTo(brick.x + brick.width * 0.66, brick.y + brick.height * 0.5);
+      context.lineTo(brick.x + brick.width * 0.66, brick.y + brick.height - bevel);
+      context.stroke();
+
+      if (brick.hitPoints === 1) {
+        context.strokeStyle = "rgba(255, 248, 220, 0.5)";
+        context.lineWidth = 1.2;
+        context.beginPath();
+        context.moveTo(brick.x + brick.width * 0.24, brick.y + brick.height * 0.18);
+        context.lineTo(brick.x + brick.width * 0.46, brick.y + brick.height * 0.42);
+        context.lineTo(brick.x + brick.width * 0.36, brick.y + brick.height * 0.78);
+        context.moveTo(brick.x + brick.width * 0.62, brick.y + brick.height * 0.2);
+        context.lineTo(brick.x + brick.width * 0.54, brick.y + brick.height * 0.5);
+        context.lineTo(brick.x + brick.width * 0.7, brick.y + brick.height * 0.76);
+        context.stroke();
+      }
+    }
 
     if (isWallBrick) {
       context.strokeStyle = "rgba(255, 255, 255, 0.42)";
@@ -2418,12 +2629,17 @@ function drawBricks() {
         context.fill();
       }
 
-      if (brick.hitPoints === 1) {
-        const crackLines = [
-          [0.18, 0.22, 0.47, 0.52, 0.66, 0.34, 0.82, 0.71],
-          [0.31, 0.14, 0.37, 0.36, 0.27, 0.66, 0.41, 0.86],
-          [0.61, 0.18, 0.56, 0.44, 0.73, 0.58, 0.64, 0.85],
-        ];
+      if (brick.hitPoints <= 2) {
+        const crackLines = brick.hitPoints === 2
+          ? [
+              [0.18, 0.22, 0.47, 0.52, 0.66, 0.34, 0.82, 0.71],
+              [0.31, 0.14, 0.37, 0.36, 0.27, 0.66, 0.41, 0.86],
+            ]
+          : [
+              [0.18, 0.22, 0.47, 0.52, 0.66, 0.34, 0.82, 0.71],
+              [0.31, 0.14, 0.37, 0.36, 0.27, 0.66, 0.41, 0.86],
+              [0.61, 0.18, 0.56, 0.44, 0.73, 0.58, 0.64, 0.85],
+            ];
 
         context.strokeStyle = "rgba(241, 245, 249, 0.45)";
         context.lineWidth = 1.2;
@@ -2443,7 +2659,7 @@ function drawBricks() {
       }
     }
 
-    if (isDiamondBrick) {
+    if (isCrystalBrick) {
       const facetLines = [
         [0.2, 0.18, 0.5, 0.06, 0.8, 0.18],
         [0.14, 0.36, 0.5, 0.2, 0.86, 0.36],
@@ -2455,7 +2671,7 @@ function drawBricks() {
         [0.2, 0.78, 0.5, 0.56, 0.8, 0.78],
       ];
 
-      context.strokeStyle = brick.hitPoints === 3 ? "rgba(255, 255, 255, 0.4)" : "rgba(224, 247, 255, 0.52)";
+      context.strokeStyle = brick.hitPoints === 4 ? "rgba(255, 255, 255, 0.4)" : "rgba(224, 247, 255, 0.52)";
       context.lineWidth = 1.1;
       context.lineCap = "round";
       context.lineJoin = "round";
@@ -2472,19 +2688,26 @@ function drawBricks() {
       }
 
       if (brick.hitPoints < brick.maxHitPoints) {
-        const crackSets = brick.hitPoints === 2
+        const crackSets = brick.hitPoints === 3
           ? [
               [0.3, 0.2, 0.42, 0.4, 0.35, 0.66],
               [0.67, 0.26, 0.59, 0.48, 0.71, 0.7],
             ]
+          : brick.hitPoints === 2
+            ? [
+                [0.24, 0.16, 0.36, 0.34, 0.31, 0.58, 0.44, 0.84],
+                [0.72, 0.18, 0.6, 0.38, 0.69, 0.56, 0.57, 0.82],
+                [0.3, 0.56, 0.5, 0.46, 0.72, 0.58],
+              ]
           : [
-              [0.24, 0.16, 0.36, 0.34, 0.31, 0.58, 0.44, 0.84],
-              [0.72, 0.18, 0.6, 0.38, 0.69, 0.56, 0.57, 0.82],
-              [0.3, 0.56, 0.5, 0.46, 0.72, 0.58],
-            ];
+                [0.22, 0.14, 0.34, 0.28, 0.29, 0.48, 0.4, 0.74, 0.34, 0.88],
+                [0.74, 0.16, 0.62, 0.34, 0.7, 0.52, 0.56, 0.78],
+                [0.28, 0.56, 0.5, 0.42, 0.74, 0.56],
+                [0.48, 0.12, 0.5, 0.34, 0.54, 0.68, 0.5, 0.94],
+              ];
 
-        context.strokeStyle = brick.hitPoints === 2 ? "rgba(207, 250, 254, 0.5)" : "rgba(224, 247, 255, 0.7)";
-        context.lineWidth = brick.hitPoints === 2 ? 1.2 : 1.35;
+        context.strokeStyle = brick.hitPoints === 3 ? "rgba(207, 250, 254, 0.5)" : "rgba(224, 247, 255, 0.7)";
+        context.lineWidth = brick.hitPoints === 3 ? 1.15 : brick.hitPoints === 2 ? 1.25 : 1.4;
 
         for (const line of crackSets) {
           context.beginPath();
@@ -2501,10 +2724,12 @@ function drawBricks() {
 
     context.strokeStyle = isWallBrick
         ? "rgba(226, 232, 240, 0.34)"
-        : isDiamondBrick
+        : isCrystalBrick
         ? "rgba(207, 250, 254, 0.3)"
         : isConcreteBrick
         ? "rgba(229, 231, 235, 0.18)"
+        : isBrickBrick
+        ? "rgba(254, 215, 170, 0.22)"
         : "rgba(255, 255, 255, 0.2)";
     context.strokeRect(brick.x, brick.y, brick.width, brick.height);
   }
@@ -2578,11 +2803,11 @@ function handleAction() {
     }
 
     projectiles.push({
-      x: paddle.x + paddle.width / 2 - 2,
-      y: paddle.y - 14,
-      width: 4,
-      height: 16,
-      speed: 640,
+      width: getProjectileWidth(),
+      height: getProjectileHeight(),
+      x: paddle.x + paddle.width / 2 - getProjectileWidth() / 2,
+      y: paddle.y - getProjectileHeight(),
+      speed: getProjectileSpeed(),
     });
     effects.shotCooldown = 0.28;
     playSound("laser");
