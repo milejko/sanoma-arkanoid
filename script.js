@@ -33,7 +33,7 @@ let lastCanvasTouchActionAt = 0;
 const LEADERBOARD_API_URL =
   "https://script.google.com/macros/s/AKfycbwjoeNIwfr1osYeAE5jLy_69eaVCosVN-KQcaLQ4VDIKmrnK6LZ6t1_RynHlwnk1wec/exec";
 const MAX_HIGH_SCORES = 10;
-const LEADERBOARD_CACHE_KEY = "sanoma-arkanoid-leaderboard-cache";
+const LEADERBOARD_CACHE_KEY = "arkanoid-leaderboard-cache";
 const CANVAS_EDGE_MARGIN = 12;
 const GRID_COLUMNS = 8;
 const GRID_ROWS = 26;

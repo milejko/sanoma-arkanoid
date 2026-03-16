@@ -56,7 +56,7 @@ Plik utrzymywany na bieżąco. Każde kolejne polecenie użytkownika w tej sesji
 50. `zmiana graficzna - level jest najwiekszy powinien byc pierwszy w HUD i numerek wieksza czcionka. zmiana mechaniki spowalniania/przyspieszania - przyspieszenie +25, spowolnienie -25% ale tylko na 15 sekund + oznaczenie graficzne - przyspieszona - mniej smuzy, spowolniona znacznie bardziej smuzy`
 51. `usuwamy z hud ilosc cegiel, level ta sama wielkosc czcionki co wynik, ilosc zyc prezentujemy serduszkami max 3 zycia (bonus zyc nie dodaje powyzej 3). Czcionka o stalej szerokosci`
 52. `zapisz do pliku MD np. history.md moje "komendy" i utrzymuj ich historie przy kolejnych komendach`
-53. `zmien TechHub Arkanoid na Sanoma Arkanoid`
+53. `zmien TechHub Arkanoid na aktualna nazwe gry`
 54. `poziomy sa za dlugie - 5 x 10 kafle`
 55. `ilosc kafli zalezna od poziomu wedlug wzoru: wysokosc = 5+zaokraglij((poziom -1) / 5) , szerokosc = 8 + zaokraglij((poziom-1) / 2)`
 56. `wysokosc 4 + round((level -1)/4) kafelki wyzsze niz poprzednio o 10%`
@@ -86,7 +86,7 @@ Plik utrzymywany na bieżąco. Każde kolejne polecenie użytkownika w tej sesji
 80. `wprowadzmy mechanizm pauzy (rozmyty ekran podobnie jak przy hiscore) po nacisnieciu "p"`
 81. `zmniejszmy ilosc kafli - 5x8`
 82. `dwie rzeczy - obszar w ktorym odbija sie pilka nie powinien byc tam gdzie logo i HUD, powinien konczyc sie tam gdzie pierwszy rzad kafli`
-83. `fatalne to logo, uzyjmy oficjalnego logo sanoma - najlepiej w svg`
+83. `fatalne to logo, uzyjmy oficjalnego logo marki - najlepiej w svg`
 84. `kolejna rzecz napis "Naciśnij P, aby wrócić do gry." - do usuniecia, "Nacisnij spacje by wystartowac" - do zamiany na ...`
 85. `blendy startowe "Poziom X - ..." do zmiany na "Poziom X..." i styl blendy jak przy pauzie`
 86. `wszystkie niebieskie napisy na blendach typu "HI-SCORE", "LEVEL", "GAME" zmien na "Arkanoid"`
@@ -207,3 +207,4 @@ Plik utrzymywany na bieżąco. Każde kolejne polecenie użytkownika w tej sesji
 200. `fix: zlapany bonus smierci nie moze juz zawiesic gry po wyczyszczeniu planszy; po loseLife przerywamy dalsza obsluge bonusow i przejscia poziomu w tej samej klatce`
 201. `fix: spowalniamy ruch paletki sterowanej klawiszami o 25%`
 202. `fix: jeszcze bardziej spowalniamy ruch paletki sterowanej klawiszami`
+203. `fix: usuwamy z repo wszystkie pozostalosci starej nazwy marki, lacznie z tytulem, README, historia i kluczem cache leaderboardu`

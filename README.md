@@ -1,10 +1,10 @@
-# Sanoma Arkanoid
+# Arkanoid
 
 Nowoczesna, przeglądarkowa wariacja na temat klasycznego **Arkanoida**. Projekt jest napisany w czystym HTML, CSS i JavaScript, bez bundlera i bez frameworków. Gra działa jako pojedyncza strona, ma responsywny interfejs, system poziomów, bonusy, pauzę oraz tablicę wyników opartą o Google Sheets.
 
 ## Co to za projekt
 
-`Sanoma Arkanoid` to lekka gra arcade uruchamiana bezpośrednio w przeglądarce. Gracz steruje paletką, odbija piłkę i czyści planszę z cegieł. Po zniszczeniu całej planszy przechodzi na kolejny poziom, a bazowa prędkość piłki rośnie.
+`Arkanoid` to lekka gra arcade uruchamiana bezpośrednio w przeglądarce. Gracz steruje paletką, odbija piłkę i czyści planszę z cegieł. Po zniszczeniu całej planszy przechodzi na kolejny poziom, a bazowa prędkość piłki rośnie.
 
 Projekt powstał jako statyczna aplikacja front-endowa:
 
@@ -166,4 +166,4 @@ Plik `history.md` zawiera kolejne polecenia i decyzje produktowe rozwijające gr
 
 ## Autorstwo
 
-Projekt rozwijany iteracyjnie jako przeglądarkowa gra typu arcade z brandingiem **Sanoma** i naciskiem na prostą, szybką rozgrywkę.
+Projekt rozwijany iteracyjnie jako przeglądarkowa gra typu arcade z naciskiem na prostą, szybką rozgrywkę.
