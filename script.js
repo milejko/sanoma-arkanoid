@@ -924,6 +924,26 @@ function renderStartOverlay() {
   }
 }
 
+function isStartOverlayVisible() {
+  return Boolean(game.message) && !leaderboardState.mode && !game.paused;
+}
+
+function raiseLevelFromStartOverlay() {
+  if (!isStartOverlayVisible()) {
+    return;
+  }
+
+  game.level += 1;
+  game.pendingLevelAdvance = false;
+  clearEffects({ preservePaddleSizeLevel: true, preserveShooter: true });
+  createBricks();
+  resetRound();
+  game.message = `Poziom ${game.level}`;
+  game.startOverlayMode = "levelStart";
+  renderStartOverlay();
+  updateHud();
+}
+
 function pauseGame() {
   if (leaderboardState.mode || game.paused || !game.running) {
     return;
@@ -2944,6 +2964,14 @@ window.addEventListener("keydown", (event) => {
     if (!leaderboardState.mode && game.running && !game.paused) {
       event.preventDefault();
       pauseGame();
+    }
+    return;
+  }
+
+  if ((event.metaKey || event.ctrlKey) && key === "l") {
+    if (event.metaKey && event.ctrlKey && isStartOverlayVisible()) {
+      event.preventDefault();
+      raiseLevelFromStartOverlay();
     }
     return;
   }
