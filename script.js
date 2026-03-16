@@ -1775,7 +1775,7 @@ function activateBonus(type) {
     effects.superBallTimer = 5;
   } else if (type === "suddenDeath") {
     loseLife();
-    return;
+    return true;
   } else if (type === "pingPong") {
     for (const brick of bricks) {
       if (!brick.alive || brick.destructible === false) {
@@ -1813,6 +1813,7 @@ function activateBonus(type) {
   }
 
   updateHud();
+  return false;
 }
 
 function updateEffects(deltaSeconds) {
@@ -1884,7 +1885,12 @@ function updateFallingBonuses(deltaSeconds) {
     if (caughtByPaddle) {
       game.score += isPositiveBonus(bonus.type) ? 200 : 400;
       playSound(getBonusCatchSoundName(bonus.type));
-      activateBonus(bonus.type);
+      const interruptedRound = activateBonus(bonus.type);
+
+      if (interruptedRound) {
+        return;
+      }
+
       fallingBonuses.splice(index, 1);
 
       if (game.pendingLevelAdvance && fallingBonuses.length === 0) {
