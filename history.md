@@ -225,3 +225,4 @@ Plik utrzymywany na bieżąco. Każde kolejne polecenie użytkownika w tej sesji
 218. `fix: wszystkie wzory scian w cyklu od poziomu 5 robimy lustrzanie symetryczne`
 219. `tuning: zmniejszamy symetryczne wzory scian przypisane do poziomow 8 i 11`
 220. `tuning: zmniejszamy tez symetryczne wzory scian przypisane do poziomow 13 i 14`
+221. `fix: odbicie pilki od kafli wypycha ja juz poza kolizje, zeby sciany layoutu nie mogly jej uwiezic`

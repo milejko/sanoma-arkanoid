@@ -1326,17 +1326,61 @@ function hasRemainingDestructibleBricks() {
   return bricks.some((brick) => brick.alive && brick.destructible !== false);
 }
 
-function bounceBallFromBrick(previousX, brick) {
+function bounceBallFromBrick(previousX, previousY, brick) {
+  const collisionPadding = 0.01;
   const wasLeftOfBrick = previousX + ball.radius <= brick.x;
   const wasRightOfBrick = previousX - ball.radius >= brick.x + brick.width;
+  const wasAboveBrick = previousY + ball.radius <= brick.y;
+  const wasBelowBrick = previousY - ball.radius >= brick.y + brick.height;
 
-  if (wasLeftOfBrick || wasRightOfBrick) {
-    ball.velocityX *= -1;
+  const overlapLeft = ball.x + ball.radius - brick.x;
+  const overlapRight = brick.x + brick.width - (ball.x - ball.radius);
+  const overlapTop = ball.y + ball.radius - brick.y;
+  const overlapBottom = brick.y + brick.height - (ball.y - ball.radius);
+  const horizontalOverlap = Math.min(overlapLeft, overlapRight);
+  const verticalOverlap = Math.min(overlapTop, overlapBottom);
+
+  if ((wasLeftOfBrick || wasRightOfBrick) && !(wasAboveBrick || wasBelowBrick)) {
+    ball.x = wasLeftOfBrick
+      ? brick.x - ball.radius - collisionPadding
+      : brick.x + brick.width + ball.radius + collisionPadding;
+    ball.velocityX = wasLeftOfBrick
+      ? -Math.abs(ball.velocityX)
+      : Math.abs(ball.velocityX);
     ball.spin *= 0.94;
     return;
   }
 
-  ball.velocityY *= -1;
+  if (wasAboveBrick || wasBelowBrick) {
+    ball.y = wasAboveBrick
+      ? brick.y - ball.radius - collisionPadding
+      : brick.y + brick.height + ball.radius + collisionPadding;
+    ball.velocityY = wasAboveBrick
+      ? -Math.abs(ball.velocityY)
+      : Math.abs(ball.velocityY);
+    ball.spin *= 0.97;
+    return;
+  }
+
+  if (horizontalOverlap < verticalOverlap) {
+    const ballIsLeftOfBrickCenter = ball.x < brick.x + brick.width / 2;
+    ball.x = ballIsLeftOfBrickCenter
+      ? brick.x - ball.radius - collisionPadding
+      : brick.x + brick.width + ball.radius + collisionPadding;
+    ball.velocityX = ballIsLeftOfBrickCenter
+      ? -Math.abs(ball.velocityX)
+      : Math.abs(ball.velocityX);
+    ball.spin *= 0.94;
+    return;
+  }
+
+  const ballIsAboveBrickCenter = ball.y < brick.y + brick.height / 2;
+  ball.y = ballIsAboveBrickCenter
+    ? brick.y - ball.radius - collisionPadding
+    : brick.y + brick.height + ball.radius + collisionPadding;
+  ball.velocityY = ballIsAboveBrickCenter
+    ? -Math.abs(ball.velocityY)
+    : Math.abs(ball.velocityY);
   ball.spin *= 0.97;
 }
 
@@ -1771,7 +1815,7 @@ function bounceOffBricks(previousX, previousY) {
       continue;
     }
 
-    bounceBallFromBrick(previousX, brick);
+    bounceBallFromBrick(previousX, previousY, brick);
     hitBrick(brick);
     break;
   }
