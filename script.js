@@ -71,11 +71,14 @@ const audioState = {
   masterGain: null,
   unlockPromise: null,
   mediaUnlockPromise: null,
+  mediaUnlocked: false,
   primed: false,
   enabled: typeof window.AudioContext === "function" || typeof window.webkitAudioContext === "function",
   lastPlayedAt: {},
   silentUnlockElement: null,
   silentUnlockUrl: null,
+  htmlAudioPools: {},
+  prefersHtmlAudioPlayback: false,
 };
 
 const leaderboardState = {
@@ -135,6 +138,16 @@ const brickConfig = {
 function getAudioContextClass() {
   return window.AudioContext || window.webkitAudioContext || null;
 }
+
+function detectLikelyIOS() {
+  const platform = navigator.platform || "";
+  const userAgent = navigator.userAgent || "";
+  const maxTouchPoints = Number(navigator.maxTouchPoints || 0);
+
+  return /iPad|iPhone|iPod/.test(userAgent) || (platform === "MacIntel" && maxTouchPoints > 1);
+}
+
+audioState.prefersHtmlAudioPlayback = detectLikelyIOS();
 
 function writeAsciiToDataView(dataView, offset, value) {
   for (let index = 0; index < value.length; index += 1) {
@@ -223,6 +236,7 @@ function unlockMediaAudio() {
     if (playResult && typeof playResult.then === "function") {
       audioState.mediaUnlockPromise = playResult
         .then(() => {
+          audioState.mediaUnlocked = true;
           audioElement.pause();
           try {
             audioElement.currentTime = 0;
@@ -232,6 +246,7 @@ function unlockMediaAudio() {
           return true;
         })
         .catch((error) => {
+          audioState.mediaUnlocked = false;
           console.warn("Nie udalo sie odblokowac media audio na iPhonie.", error);
           return false;
         })
@@ -239,6 +254,7 @@ function unlockMediaAudio() {
           audioState.mediaUnlockPromise = null;
         });
     } else {
+      audioState.mediaUnlocked = true;
       audioElement.pause();
       audioState.mediaUnlockPromise = Promise.resolve(true).finally(() => {
         audioState.mediaUnlockPromise = null;
@@ -361,6 +377,285 @@ function canPlayAudio(name, minInterval = 0.04) {
   return true;
 }
 
+function getSoundSpec(name) {
+  if (name === "launch") {
+    return {
+      minInterval: 0.08,
+      tones: [
+        { delay: 0, frequency: 320, endFrequency: 540, duration: 0.12, type: "triangle", volume: 0.18 },
+        { delay: 0.04, frequency: 640, endFrequency: 860, duration: 0.08, type: "sine", volume: 0.11 },
+      ],
+    };
+  }
+
+  if (name === "paddleHit") {
+    return {
+      minInterval: 0.03,
+      tones: [{ delay: 0, frequency: 220, endFrequency: 300, duration: 0.05, type: "triangle", volume: 0.12 }],
+    };
+  }
+
+  if (name === "wallHit") {
+    return {
+      minInterval: 0.03,
+      tones: [{ delay: 0, frequency: 170, endFrequency: 140, duration: 0.045, type: "sine", volume: 0.08 }],
+    };
+  }
+
+  if (name === "brickHit") {
+    return {
+      minInterval: 0.02,
+      tones: [{ delay: 0, frequency: 420, endFrequency: 360, duration: 0.04, type: "square", volume: 0.06 }],
+    };
+  }
+
+  if (name === "positiveBonusCatch") {
+    return {
+      minInterval: 0.06,
+      tones: [
+        { delay: 0, frequency: 520, endFrequency: 760, duration: 0.09, type: "triangle", volume: 0.15 },
+        { delay: 0.05, frequency: 780, endFrequency: 980, duration: 0.07, type: "sine", volume: 0.1 },
+      ],
+    };
+  }
+
+  if (name === "negativeBonusCatch") {
+    return {
+      minInterval: 0.06,
+      tones: [
+        { delay: 0, frequency: 430, endFrequency: 280, duration: 0.1, type: "sawtooth", volume: 0.13 },
+        { delay: 0.045, frequency: 260, endFrequency: 190, duration: 0.09, type: "triangle", volume: 0.08 },
+      ],
+    };
+  }
+
+  if (name === "positiveSuperBonusCatch") {
+    return {
+      minInterval: 0.08,
+      tones: [
+        { delay: 0, frequency: 380, endFrequency: 720, duration: 0.14, type: "sawtooth", volume: 0.13 },
+        { delay: 0.06, frequency: 880, endFrequency: 1260, duration: 0.1, type: "triangle", volume: 0.1 },
+      ],
+    };
+  }
+
+  if (name === "negativeSuperBonusCatch") {
+    return {
+      minInterval: 0.08,
+      tones: [
+        { delay: 0, frequency: 310, endFrequency: 170, duration: 0.16, type: "sawtooth", volume: 0.14 },
+        { delay: 0.05, frequency: 220, endFrequency: 120, duration: 0.14, type: "square", volume: 0.1 },
+      ],
+    };
+  }
+
+  if (name === "laser") {
+    return {
+      minInterval: 0.04,
+      tones: [{ delay: 0, frequency: 920, endFrequency: 460, duration: 0.05, type: "sawtooth", volume: 0.07 }],
+    };
+  }
+
+  if (name === "lifeLost") {
+    return {
+      minInterval: 0.12,
+      tones: [
+        { delay: 0, frequency: 280, endFrequency: 140, duration: 0.16, type: "sawtooth", volume: 0.16 },
+        { delay: 0.07, frequency: 160, endFrequency: 90, duration: 0.18, type: "triangle", volume: 0.1 },
+      ],
+    };
+  }
+
+  if (name === "levelUp") {
+    return {
+      minInterval: 0.2,
+      tones: [
+        { delay: 0, frequency: 360, duration: 0.08, type: "triangle", volume: 0.12 },
+        { delay: 0.08, frequency: 540, duration: 0.08, type: "triangle", volume: 0.12 },
+        { delay: 0.16, frequency: 760, duration: 0.11, type: "sine", volume: 0.13 },
+      ],
+    };
+  }
+
+  if (name === "pause") {
+    return {
+      minInterval: 0.08,
+      tones: [{ delay: 0, frequency: 300, endFrequency: 250, duration: 0.08, type: "triangle", volume: 0.09 }],
+    };
+  }
+
+  if (name === "resume") {
+    return {
+      minInterval: 0.08,
+      tones: [{ delay: 0, frequency: 250, endFrequency: 340, duration: 0.08, type: "triangle", volume: 0.09 }],
+    };
+  }
+
+  if (name === "gameOver") {
+    return {
+      minInterval: 0.25,
+      tones: [
+        { delay: 0, frequency: 240, endFrequency: 160, duration: 0.18, type: "sawtooth", volume: 0.13 },
+        { delay: 0.14, frequency: 150, endFrequency: 72, duration: 0.3, type: "triangle", volume: 0.12 },
+      ],
+    };
+  }
+
+  return null;
+}
+
+function getToneSample(type, phase) {
+  if (type === "square") {
+    return Math.sign(Math.sin(phase)) || 1;
+  }
+
+  if (type === "triangle") {
+    return (2 / Math.PI) * Math.asin(Math.sin(phase));
+  }
+
+  if (type === "sawtooth") {
+    const cycle = phase / (Math.PI * 2);
+    return 2 * (cycle - Math.floor(cycle + 0.5));
+  }
+
+  return Math.sin(phase);
+}
+
+function createPcmWaveBlob(channelData, sampleRate) {
+  const headerSize = 44;
+  const byteLength = channelData.length * 2;
+  const buffer = new ArrayBuffer(headerSize + byteLength);
+  const dataView = new DataView(buffer);
+
+  writeAsciiToDataView(dataView, 0, "RIFF");
+  dataView.setUint32(4, 36 + byteLength, true);
+  writeAsciiToDataView(dataView, 8, "WAVE");
+  writeAsciiToDataView(dataView, 12, "fmt ");
+  dataView.setUint32(16, 16, true);
+  dataView.setUint16(20, 1, true);
+  dataView.setUint16(22, 1, true);
+  dataView.setUint32(24, sampleRate, true);
+  dataView.setUint32(28, sampleRate * 2, true);
+  dataView.setUint16(32, 2, true);
+  dataView.setUint16(34, 16, true);
+  writeAsciiToDataView(dataView, 36, "data");
+  dataView.setUint32(40, byteLength, true);
+
+  for (let index = 0; index < channelData.length; index += 1) {
+    const sample = Math.max(-1, Math.min(1, channelData[index]));
+    dataView.setInt16(headerSize + index * 2, sample * 32767, true);
+  }
+
+  return new Blob([buffer], { type: "audio/wav" });
+}
+
+function buildHtmlAudioSoundUrl(name) {
+  const soundSpec = getSoundSpec(name);
+
+  if (!soundSpec) {
+    return null;
+  }
+
+  const sampleRate = 22050;
+  const release = 0.09;
+  const totalDuration = Math.max(
+    0.12,
+    ...soundSpec.tones.map((tone) => tone.delay + tone.duration + release + 0.04)
+  );
+  const totalSamples = Math.ceil(totalDuration * sampleRate);
+  const channelData = new Float32Array(totalSamples);
+
+  for (const tone of soundSpec.tones) {
+    const toneStartIndex = Math.floor(tone.delay * sampleRate);
+    const toneEndIndex = Math.min(totalSamples, Math.ceil((tone.delay + tone.duration + release) * sampleRate));
+    let phase = 0;
+
+    for (let sampleIndex = toneStartIndex; sampleIndex < toneEndIndex; sampleIndex += 1) {
+      const timeFromToneStart = sampleIndex / sampleRate - tone.delay;
+      const normalized = Math.max(0, Math.min(1, tone.duration > 0 ? timeFromToneStart / tone.duration : 1));
+      const currentFrequency =
+        tone.endFrequency && tone.endFrequency !== tone.frequency
+          ? tone.frequency * Math.pow(Math.max(0.0001, tone.endFrequency / tone.frequency), normalized)
+          : tone.frequency;
+
+      phase += (Math.PI * 2 * currentFrequency) / sampleRate;
+
+      const attack = 0.005;
+      let envelope = 0;
+      if (timeFromToneStart <= tone.duration) {
+        envelope = Math.min(1, timeFromToneStart / attack);
+      } else {
+        const releaseProgress = (timeFromToneStart - tone.duration) / release;
+        envelope = Math.max(0, 1 - releaseProgress);
+      }
+
+      channelData[sampleIndex] += getToneSample(tone.type, phase) * envelope * tone.volume * 0.85;
+    }
+  }
+
+  return URL.createObjectURL(createPcmWaveBlob(channelData, sampleRate));
+}
+
+function getHtmlAudioPool(name) {
+  if (audioState.htmlAudioPools[name]) {
+    return audioState.htmlAudioPools[name];
+  }
+
+  const soundUrl = buildHtmlAudioSoundUrl(name);
+
+  if (!soundUrl) {
+    return null;
+  }
+
+  const poolSize = name === "brickHit" || name === "paddleHit" ? 6 : 3;
+  const pool = [];
+
+  for (let index = 0; index < poolSize; index += 1) {
+    const audioElement = new Audio(soundUrl);
+    audioElement.preload = "auto";
+    audioElement.volume = 1;
+    audioElement.playsInline = true;
+    audioElement.setAttribute("playsinline", "");
+    audioElement.setAttribute("webkit-playsinline", "");
+    pool.push(audioElement);
+  }
+
+  audioState.htmlAudioPools[name] = pool;
+  return pool;
+}
+
+function playHtmlAudioSound(name) {
+  const soundSpec = getSoundSpec(name);
+
+  if (!soundSpec || !canPlayAudio(name, soundSpec.minInterval)) {
+    return;
+  }
+
+  const pool = getHtmlAudioPool(name);
+
+  if (!pool || pool.length === 0) {
+    return;
+  }
+
+  const audioElement =
+    pool.find((entry) => entry.paused || entry.ended) || pool[0];
+
+  try {
+    audioElement.pause();
+    audioElement.currentTime = 0;
+  } catch (_error) {
+    // Ignore reset issues for reused pool entries.
+  }
+
+  const playResult = audioElement.play();
+  if (playResult && typeof playResult.catch === "function") {
+    playResult.catch((error) => {
+      console.warn(`Nie udalo sie odtworzyc fallback audio dla ${name}.`, error);
+      audioState.mediaUnlocked = false;
+    });
+  }
+}
+
 function playTone(startTime, {
   frequency,
   duration,
@@ -398,6 +693,20 @@ function playTone(startTime, {
 }
 
 function playSound(name) {
+  if (audioState.prefersHtmlAudioPlayback) {
+    if (!audioState.mediaUnlocked) {
+      void unlockMediaAudio().then((unlocked) => {
+        if (unlocked) {
+          playHtmlAudioSound(name);
+        }
+      });
+      return;
+    }
+
+    playHtmlAudioSound(name);
+    return;
+  }
+
   const audioContext = ensureAudioContext();
 
   if (!audioContext) {

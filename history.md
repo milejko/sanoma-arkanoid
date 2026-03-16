@@ -196,3 +196,4 @@ Plik utrzymywany na bieżąco. Każde kolejne polecenie użytkownika w tej sesji
 189. `fix: cofamy start kafli na drugi rzad siatki`
 190. `2 fixy: HUD i plansza maja ten sam kolor obwodki oraz ten sam border-radius; wzmacniamy odblokowanie Web Audio pod iPhone Safari przez cichy buffer source i dodatkowe gesty end/up`
 191. `fix: jeszcze mocniej wzmacniamy audio na iPhone Safari przez audioSession=playback oraz ukryty silent audio unlock w realnym geście`
+192. `fix: na iPhone/iOS dodajemy fallback SFX przez generowane WAV-y odtwarzane jako HTMLAudio/media channel zamiast polegac tylko na Web Audio`
