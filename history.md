@@ -218,3 +218,4 @@ Plik utrzymywany na bieżąco. Każde kolejne polecenie użytkownika w tej sesji
 211. `fix: sciany dostaja wiecej roznych wzorow w cyklu poziomow 5-12 zamiast prostego dokladania jednego ukladu`
 212. `fix: dopracowujemy wzory scian, zeby byly bardziej charakterystyczne - np. brama, filary, klepsydra i zygzak`
 213. `fix: zwykle kafle dostaja bardziej teczowa palete, ale odsunieta od kolorow ceglanego, betonowego, krysztalowego i scian`
+214. `fix: dolny rzad zwyklych kafli dostaje zloty wariant`

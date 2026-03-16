@@ -2447,7 +2447,7 @@ function drawBricks() {
     { base: "#a855f7", glow: "rgba(168, 85, 247, 0.42)", light: "rgba(243, 232, 255, 0.45)", dark: "rgba(76, 29, 149, 0.34)", insetLight: "rgba(233, 213, 255, 0.24)", insetMid: "rgba(192, 132, 252, 0.12)", insetDark: "rgba(59, 7, 100, 0.16)" },
     { base: "#6366f1", glow: "rgba(99, 102, 241, 0.42)", light: "rgba(224, 231, 255, 0.45)", dark: "rgba(49, 46, 129, 0.34)", insetLight: "rgba(199, 210, 254, 0.24)", insetMid: "rgba(129, 140, 248, 0.12)", insetDark: "rgba(30, 27, 75, 0.16)" },
     { base: "#22c55e", glow: "rgba(34, 197, 94, 0.42)", light: "rgba(220, 252, 231, 0.44)", dark: "rgba(20, 83, 45, 0.34)", insetLight: "rgba(187, 247, 208, 0.22)", insetMid: "rgba(74, 222, 128, 0.12)", insetDark: "rgba(5, 46, 22, 0.16)" },
-    { base: "#e879f9", glow: "rgba(232, 121, 249, 0.42)", light: "rgba(250, 232, 255, 0.46)", dark: "rgba(134, 25, 143, 0.34)", insetLight: "rgba(245, 208, 254, 0.24)", insetMid: "rgba(240, 171, 252, 0.12)", insetDark: "rgba(74, 4, 78, 0.16)" },
+    { base: "#facc15", glow: "rgba(250, 204, 21, 0.44)", light: "rgba(254, 249, 195, 0.48)", dark: "rgba(133, 77, 14, 0.34)", insetLight: "rgba(254, 240, 138, 0.24)", insetMid: "rgba(253, 224, 71, 0.14)", insetDark: "rgba(92, 48, 4, 0.16)" },
   ];
   const bevel = Math.max(1.5, Math.min(getTileHeight() * 0.22, 4));
 
