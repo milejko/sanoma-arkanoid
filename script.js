@@ -524,6 +524,11 @@ const bonusCatalog = {
     symbol: "SA",
     color: "#67e8f9",
   },
+  blackDiamondCombo: {
+    label: "Potrójna armata",
+    symbol: "3A",
+    color: "#94a3b8",
+  },
   shrinkHalf: {
     label: "Paletka -50%",
     symbol: "-",
@@ -541,10 +546,10 @@ const bonusCatalog = {
   },
 };
 
-const positiveBonusTypes = ["widen", "sticky", "shooter", "extraLife", "speedDouble", "superBall", "crystalCombo"];
+const positiveBonusTypes = ["widen", "sticky", "shooter", "extraLife", "speedDouble", "superBall", "crystalCombo", "blackDiamondCombo"];
 const standardNegativeBonusTypes = ["shrinkHalf", "speedTriple"];
 const negativeBonusTypes = [...standardNegativeBonusTypes];
-const superBonusTypes = ["extraLife", "superBall", "crystalCombo"];
+const superBonusTypes = ["extraLife", "superBall", "crystalCombo", "blackDiamondCombo"];
 const standardBonusTypes = ["widen", "sticky", "shooter", ...standardNegativeBonusTypes];
 
 let highScores = [];
@@ -1129,6 +1134,9 @@ const effects = {
   superShooterActive: false,
   superShooterKeepsShooter: false,
   superShooterTimer: 0,
+  tripleCannonActive: false,
+  tripleCannonKeepsShooter: false,
+  tripleCannonTimer: 0,
   superBallActive: false,
   superBallTimer: 0,
   speedModifier: 0,
@@ -1155,6 +1163,12 @@ function setBrickMaterial(brick, material) {
   if (material === "crystal") {
     brick.hitPoints = 4;
     brick.maxHitPoints = 4;
+    return;
+  }
+
+  if (material === "blackDiamond") {
+    brick.hitPoints = 5;
+    brick.maxHitPoints = 5;
     return;
   }
 
@@ -1243,16 +1257,26 @@ function createBricks() {
   const concreteCount = game.level >= 4 ? Math.min(1, remainingAfterBrick) : 0;
   const remainingAfterConcrete = Math.max(0, remainingAfterBrick - concreteCount);
   const crystalCount = game.level >= 6 ? Math.min(1, remainingAfterConcrete) : 0;
+  const remainingAfterCrystal = Math.max(0, remainingAfterConcrete - crystalCount);
+  const blackDiamondCount = game.level >= 8 ? Math.min(1, remainingAfterCrystal) : 0;
   const crystalIndices = durableCandidateIndices.slice(0, crystalCount);
-  const concreteIndices = durableCandidateIndices.slice(crystalCount, crystalCount + concreteCount);
+  const blackDiamondIndices = durableCandidateIndices.slice(crystalCount, crystalCount + blackDiamondCount);
+  const concreteIndices = durableCandidateIndices.slice(
+    crystalCount + blackDiamondCount,
+    crystalCount + blackDiamondCount + concreteCount
+  );
   const brickIndices = durableCandidateIndices.slice(
-    crystalCount + concreteCount,
-    crystalCount + concreteCount + brickCount
+    crystalCount + blackDiamondCount + concreteCount,
+    crystalCount + blackDiamondCount + concreteCount + brickCount
   );
   const shuffledStandardBonusTypes = shuffleArray([...standardBonusTypes]);
 
   for (const brickIndex of crystalIndices) {
     setBrickMaterial(bricks[brickIndex], "crystal");
+  }
+
+  for (const brickIndex of blackDiamondIndices) {
+    setBrickMaterial(bricks[brickIndex], "blackDiamond");
   }
 
   for (const brickIndex of concreteIndices) {
@@ -1277,6 +1301,10 @@ function createBricks() {
 
   for (const brickIndex of crystalIndices) {
     bricks[brickIndex].bonusType = "crystalCombo";
+  }
+
+  for (const brickIndex of blackDiamondIndices) {
+    bricks[brickIndex].bonusType = "blackDiamondCombo";
   }
 
   for (const wallTile of getLayoutWallTiles()) {
@@ -1499,7 +1527,9 @@ function syncPaddleWidth() {
 
 function clearEffects({ preservePaddleSizeLevel = false, preserveShooter = false } = {}) {
   const keepShooterAfterClear = preserveShooter
-    ? effects.shooterActive && (!effects.superShooterActive || effects.superShooterKeepsShooter)
+    ? effects.shooterActive &&
+      (!effects.superShooterActive || effects.superShooterKeepsShooter) &&
+      (!effects.tripleCannonActive || effects.tripleCannonKeepsShooter)
     : false;
 
   if (!preservePaddleSizeLevel) {
@@ -1511,6 +1541,9 @@ function clearEffects({ preservePaddleSizeLevel = false, preserveShooter = false
   effects.superShooterActive = false;
   effects.superShooterKeepsShooter = false;
   effects.superShooterTimer = 0;
+  effects.tripleCannonActive = false;
+  effects.tripleCannonKeepsShooter = false;
+  effects.tripleCannonTimer = 0;
   effects.superBallActive = false;
   effects.superBallTimer = 0;
   effects.speedModifier = 0;
@@ -1859,6 +1892,9 @@ function activateBonus(type) {
     if (effects.superShooterActive) {
       effects.superShooterKeepsShooter = true;
     }
+    if (effects.tripleCannonActive) {
+      effects.tripleCannonKeepsShooter = true;
+    }
   } else if (type === "extraLife") {
     game.lives = Math.min(3, game.lives + 1);
   } else if (type === "superBall") {
@@ -1866,9 +1902,21 @@ function activateBonus(type) {
     effects.superBallTimer = 5;
   } else if (type === "crystalCombo") {
     effects.superShooterKeepsShooter = effects.superShooterKeepsShooter || effects.shooterActive;
+    effects.tripleCannonActive = false;
+    effects.tripleCannonKeepsShooter = false;
+    effects.tripleCannonTimer = 0;
     effects.shooterActive = true;
     effects.superShooterActive = true;
     effects.superShooterTimer = 15;
+  } else if (type === "blackDiamondCombo") {
+    effects.tripleCannonKeepsShooter =
+      effects.tripleCannonKeepsShooter || effects.shooterActive || effects.superShooterActive;
+    effects.superShooterActive = false;
+    effects.superShooterKeepsShooter = false;
+    effects.superShooterTimer = 0;
+    effects.shooterActive = true;
+    effects.tripleCannonActive = true;
+    effects.tripleCannonTimer = 15;
   } else if (type === "speedDouble") {
     const previousSpeedFactor = 1 + effects.speedModifier;
     effects.speedModifier = -0.5;
@@ -1908,6 +1956,16 @@ function updateEffects(deltaSeconds) {
       effects.superShooterActive = false;
       effects.shooterActive = effects.superShooterKeepsShooter;
       effects.superShooterKeepsShooter = false;
+      hudChanged = true;
+    }
+  }
+
+  if (effects.tripleCannonActive) {
+    effects.tripleCannonTimer = Math.max(0, effects.tripleCannonTimer - deltaSeconds);
+    if (effects.tripleCannonTimer === 0) {
+      effects.tripleCannonActive = false;
+      effects.shooterActive = effects.tripleCannonKeepsShooter;
+      effects.tripleCannonKeepsShooter = false;
       hudChanged = true;
     }
   }
@@ -2107,12 +2165,18 @@ function drawPaddle() {
   const isSticky = effects.stickyActive;
   const isShooter = effects.shooterActive;
   const isSuperShooter = effects.superShooterActive;
+  const isTripleCannon = effects.tripleCannonActive;
 
   if (isSticky) {
     bodyGradient.addColorStop(0, "#ecfccb");
     bodyGradient.addColorStop(0.18, "#86efac");
     bodyGradient.addColorStop(0.62, "#22c55e");
     bodyGradient.addColorStop(1, "#166534");
+  } else if (isTripleCannon) {
+    bodyGradient.addColorStop(0, "#e2e8f0");
+    bodyGradient.addColorStop(0.18, "#64748b");
+    bodyGradient.addColorStop(0.62, "#111827");
+    bodyGradient.addColorStop(1, "#020617");
   } else if (isSuperShooter) {
     bodyGradient.addColorStop(0, "#ffe4e6");
     bodyGradient.addColorStop(0.18, "#fb7185");
@@ -2127,6 +2191,8 @@ function drawPaddle() {
 
   context.shadowColor = isSticky
     ? "rgba(74, 222, 128, 0.45)"
+    : isTripleCannon
+    ? "rgba(148, 163, 184, 0.36)"
     : isSuperShooter
     ? "rgba(248, 113, 113, 0.45)"
     : "rgba(34, 211, 238, 0.45)";
@@ -2177,18 +2243,34 @@ function drawPaddle() {
     const cannonCoreWidth = Math.max(4, Math.min(6, paddle.width * 0.14));
     const cannonBaseHeight = Math.max(4, Math.min(7, getTileHeight() * 0.45));
     const cannonCoreHeight = Math.max(6, Math.min(8, getTileHeight() * 0.52));
-    const cannonBaseX = paddle.x + paddle.width / 2 - cannonBaseWidth / 2;
-    const cannonCoreX = paddle.x + paddle.width / 2 - cannonCoreWidth / 2;
+    const drawCannon = (centerX, coreColor, coreHeightMultiplier = 1) => {
+      const barrelBaseWidth = isTripleCannon
+        ? Math.max(6, Math.min(10, paddle.width * 0.18))
+        : cannonBaseWidth;
+      const barrelCoreWidth = isTripleCannon
+        ? Math.max(3, Math.min(5, paddle.width * 0.08))
+        : cannonCoreWidth;
+      const barrelBaseX = centerX - barrelBaseWidth / 2;
+      const barrelCoreX = centerX - barrelCoreWidth / 2;
 
-    context.fillStyle = isSuperShooter ? "#fecaca" : "#cbd5e1";
-    context.fillRect(cannonBaseX, paddle.y - cannonBaseHeight, cannonBaseWidth, cannonBaseHeight);
-    context.fillStyle = isSuperShooter ? "#ef4444" : "#38bdf8";
-    context.fillRect(
-      cannonCoreX,
-      paddle.y - cannonBaseHeight - cannonCoreHeight * 0.85,
-      cannonCoreWidth,
-      cannonCoreHeight
-    );
+      context.fillStyle = coreColor === "#ef4444" ? "#fecaca" : "#cbd5e1";
+      context.fillRect(barrelBaseX, paddle.y - cannonBaseHeight, barrelBaseWidth, cannonBaseHeight);
+      context.fillStyle = coreColor;
+      context.fillRect(
+        barrelCoreX,
+        paddle.y - cannonBaseHeight - cannonCoreHeight * 0.85 * coreHeightMultiplier,
+        barrelCoreWidth,
+        cannonCoreHeight * coreHeightMultiplier
+      );
+    };
+
+    if (isTripleCannon) {
+      drawCannon(paddle.x + paddle.width * 0.22, "#38bdf8", 0.9);
+      drawCannon(paddle.x + paddle.width * 0.5, "#ef4444", 1.1);
+      drawCannon(paddle.x + paddle.width * 0.78, "#38bdf8", 0.9);
+    } else {
+      drawCannon(paddle.x + paddle.width / 2, isSuperShooter ? "#ef4444" : "#38bdf8");
+    }
   }
 
   context.shadowBlur = 0;
@@ -2431,6 +2513,24 @@ function drawBonusIcon(type, centerX, centerY, size, isPositive) {
     context.lineTo(size * 0.03, -size * 0.28);
     context.closePath();
     context.fill();
+  } else if (type === "blackDiamondCombo") {
+    context.fillStyle = "#cbd5e1";
+    context.fillRect(-size * 0.36, size * 0.05, size * 0.72, size * 0.12);
+    context.fillStyle = "#38bdf8";
+    context.fillRect(-size * 0.3, -size * 0.2, size * 0.09, size * 0.24);
+    context.fillRect(size * 0.21, -size * 0.2, size * 0.09, size * 0.24);
+    context.fillStyle = "#ef4444";
+    context.fillRect(-size * 0.06, -size * 0.32, size * 0.12, size * 0.36);
+    context.strokeStyle = "#f8fafc";
+    context.beginPath();
+    context.moveTo(0, -size * 0.44);
+    context.lineTo(-size * 0.08, -size * 0.26);
+    context.lineTo(size * 0.01, -size * 0.26);
+    context.lineTo(-size * 0.03, -size * 0.08);
+    context.lineTo(size * 0.12, -size * 0.3);
+    context.lineTo(size * 0.03, -size * 0.3);
+    context.closePath();
+    context.fill();
   } else if (type === "resetPaddle") {
     context.beginPath();
     context.moveTo(-size * 0.22, -size * 0.22);
@@ -2547,11 +2647,14 @@ function drawBricks() {
     const isBrickBrick = brick.material === "brick";
     const isConcreteBrick = brick.material === "concrete";
     const isCrystalBrick = brick.material === "crystal";
+    const isBlackDiamondBrick = brick.material === "blackDiamond";
     const isWallBrick = brick.material === "wall";
     const colorRow = Math.max(0, brick.row - BRICK_START_ROW);
     const standardPalette = standardBrickPalettes[colorRow % standardBrickPalettes.length];
     const baseColor = isWallBrick
         ? "#d1d5db"
+        : isBlackDiamondBrick
+        ? "#111827"
         : isCrystalBrick
         ? "#67e8f9"
         : isConcreteBrick
@@ -2569,6 +2672,8 @@ function drawBricks() {
       0,
       isWallBrick
           ? "rgba(255, 255, 255, 0.62)"
+          : isBlackDiamondBrick
+          ? "rgba(226, 232, 240, 0.26)"
           : isCrystalBrick
           ? "rgba(240, 253, 255, 0.56)"
           : isConcreteBrick
@@ -2583,6 +2688,8 @@ function drawBricks() {
       0.72,
       isCrystalBrick
           ? "#22d3ee"
+          : isBlackDiamondBrick
+          ? "#334155"
           : isConcreteBrick
           ? "#9ca3af"
           : isBrickBrick
@@ -2593,6 +2700,8 @@ function drawBricks() {
       1,
       isWallBrick
           ? "rgba(100, 116, 139, 0.34)"
+          : isBlackDiamondBrick
+          ? "rgba(2, 6, 23, 0.5)"
           : isCrystalBrick
           ? "rgba(8, 47, 73, 0.4)"
           : isConcreteBrick
@@ -2604,6 +2713,8 @@ function drawBricks() {
 
     context.shadowColor = isWallBrick
         ? "rgba(226, 232, 240, 0.4)"
+        : isBlackDiamondBrick
+        ? "rgba(148, 163, 184, 0.24)"
         : isCrystalBrick
         ? "rgba(34, 211, 238, 0.45)"
         : isConcreteBrick
@@ -2611,7 +2722,7 @@ function drawBricks() {
           : isBrickBrick
           ? "rgba(194, 65, 12, 0.4)"
           : standardPalette.glow;
-    context.shadowBlur = isConcreteBrick ? 6 : 14;
+    context.shadowBlur = isConcreteBrick ? 6 : isBlackDiamondBrick ? 10 : 14;
     context.shadowOffsetY = 4;
     context.fillStyle = face;
     context.fillRect(brick.x, brick.y, brick.width, brick.height);
@@ -2620,6 +2731,8 @@ function drawBricks() {
 
     context.fillStyle = isWallBrick
         ? "rgba(255, 255, 255, 0.58)"
+        : isBlackDiamondBrick
+        ? "rgba(226, 232, 240, 0.28)"
         : isCrystalBrick
         ? "rgba(240, 253, 255, 0.56)"
         : isConcreteBrick
@@ -2632,6 +2745,8 @@ function drawBricks() {
 
     context.fillStyle = isWallBrick
         ? "rgba(100, 116, 139, 0.28)"
+        : isBlackDiamondBrick
+        ? "rgba(15, 23, 42, 0.42)"
         : isCrystalBrick
         ? "rgba(8, 47, 73, 0.3)"
         : isConcreteBrick
@@ -2662,6 +2777,8 @@ function drawBricks() {
       0,
       isWallBrick
           ? "rgba(255, 255, 255, 0.22)"
+          : isBlackDiamondBrick
+          ? "rgba(226, 232, 240, 0.14)"
           : isCrystalBrick
           ? "rgba(255, 255, 255, 0.3)"
           : isConcreteBrick
@@ -2674,6 +2791,8 @@ function drawBricks() {
       0.4,
       isWallBrick
           ? "rgba(226, 232, 240, 0.16)"
+          : isBlackDiamondBrick
+          ? "rgba(71, 85, 105, 0.18)"
           : isCrystalBrick
           ? "rgba(224, 242, 254, 0.18)"
           : isConcreteBrick
@@ -2686,6 +2805,8 @@ function drawBricks() {
       1,
       isWallBrick
           ? "rgba(148, 163, 184, 0.14)"
+          : isBlackDiamondBrick
+          ? "rgba(15, 23, 42, 0.24)"
           : isCrystalBrick
           ? "rgba(12, 74, 110, 0.18)"
           : isConcreteBrick
@@ -2850,8 +2971,76 @@ function drawBricks() {
       }
     }
 
+    if (isBlackDiamondBrick) {
+      const facetLines = [
+        [0.18, 0.22, 0.5, 0.06, 0.82, 0.22],
+        [0.14, 0.42, 0.5, 0.24, 0.86, 0.42],
+        [0.18, 0.22, 0.14, 0.42, 0.2, 0.76],
+        [0.82, 0.22, 0.86, 0.42, 0.8, 0.76],
+        [0.2, 0.76, 0.5, 0.94, 0.8, 0.76],
+        [0.5, 0.06, 0.5, 0.94],
+        [0.14, 0.42, 0.5, 0.58, 0.86, 0.42],
+        [0.2, 0.76, 0.5, 0.58, 0.8, 0.76],
+      ];
+
+      context.strokeStyle = brick.hitPoints === brick.maxHitPoints
+        ? "rgba(226, 232, 240, 0.46)"
+        : "rgba(203, 213, 225, 0.58)";
+      context.lineWidth = 1.05;
+      context.lineCap = "round";
+      context.lineJoin = "round";
+
+      for (const line of facetLines) {
+        context.beginPath();
+        context.moveTo(brick.x + brick.width * line[0], brick.y + brick.height * line[1]);
+
+        for (let index = 2; index < line.length; index += 2) {
+          context.lineTo(brick.x + brick.width * line[index], brick.y + brick.height * line[index + 1]);
+        }
+
+        context.stroke();
+      }
+
+      if (brick.hitPoints < brick.maxHitPoints) {
+        const damageLines = brick.hitPoints >= 4
+          ? [[0.28, 0.2, 0.42, 0.42, 0.34, 0.7]]
+          : brick.hitPoints === 3
+            ? [
+                [0.28, 0.2, 0.42, 0.42, 0.34, 0.7],
+                [0.7, 0.24, 0.58, 0.44, 0.66, 0.72],
+              ]
+            : brick.hitPoints === 2
+              ? [
+                  [0.24, 0.16, 0.36, 0.34, 0.31, 0.58, 0.42, 0.84],
+                  [0.74, 0.18, 0.6, 0.38, 0.69, 0.56, 0.57, 0.82],
+                  [0.3, 0.56, 0.5, 0.44, 0.72, 0.58],
+                ]
+              : [
+                  [0.22, 0.14, 0.34, 0.28, 0.29, 0.48, 0.4, 0.74, 0.34, 0.88],
+                  [0.74, 0.16, 0.62, 0.34, 0.7, 0.52, 0.56, 0.78],
+                  [0.28, 0.56, 0.5, 0.42, 0.74, 0.56],
+                  [0.48, 0.12, 0.5, 0.34, 0.54, 0.68, 0.5, 0.94],
+                ];
+
+        context.strokeStyle = "rgba(241, 245, 249, 0.42)";
+        context.lineWidth = 1.15;
+        for (const line of damageLines) {
+          context.beginPath();
+          context.moveTo(brick.x + brick.width * line[0], brick.y + brick.height * line[1]);
+
+          for (let index = 2; index < line.length; index += 2) {
+            context.lineTo(brick.x + brick.width * line[index], brick.y + brick.height * line[index + 1]);
+          }
+
+          context.stroke();
+        }
+      }
+    }
+
     context.strokeStyle = isWallBrick
         ? "rgba(226, 232, 240, 0.34)"
+        : isBlackDiamondBrick
+        ? "rgba(203, 213, 225, 0.22)"
         : isCrystalBrick
         ? "rgba(207, 250, 254, 0.3)"
         : isConcreteBrick
@@ -2941,15 +3130,26 @@ function handleAction({ allowUiStart = false } = {}) {
       return;
     }
 
-    projectiles.push({
-      width: getProjectileWidth(),
-      height: getProjectileHeight(),
-      x: paddle.x + paddle.width / 2 - getProjectileWidth() / 2,
-      y: paddle.y - getProjectileHeight(),
-      speed: getProjectileSpeed(),
-      canDestroyWalls: effects.superShooterActive,
-      instantDestroy: effects.superShooterActive,
-    });
+    const createProjectile = (centerX, isSuperShot = false) => {
+      const projectileWidth = getProjectileWidth();
+      projectiles.push({
+        width: projectileWidth,
+        height: getProjectileHeight(),
+        x: centerX - projectileWidth / 2,
+        y: paddle.y - getProjectileHeight(),
+        speed: getProjectileSpeed(),
+        canDestroyWalls: isSuperShot,
+        instantDestroy: isSuperShot,
+      });
+    };
+
+    if (effects.tripleCannonActive) {
+      createProjectile(paddle.x + paddle.width * 0.22);
+      createProjectile(paddle.x + paddle.width * 0.5, true);
+      createProjectile(paddle.x + paddle.width * 0.78);
+    } else {
+      createProjectile(paddle.x + paddle.width / 2, effects.superShooterActive);
+    }
     effects.shotCooldown = 0.28;
     playSound("laser");
   }

@@ -21,7 +21,7 @@ Projekt powstał jako statyczna aplikacja front-endowa:
 - stały układ planszy oparty o kwadratową kanwę z siatką `8 x 26`,
 - przechodzenie między poziomami,
 - wzrost bazowej prędkości piłki o 5% na każdy kolejny poziom,
-- betonowe i diamentowe cegły wymagające wielu trafień na wyższych poziomach,
+- betonowe, kryształowe i czarne diamentowe cegły wymagające wielu trafień na wyższych poziomach,
 - system bonusów pozytywnych i negatywnych,
 - syntetyczne efekty dźwiękowe w kosmicznym stylu, w tym osobne SFX dla dobrych i złych bonusów,
 - pauza uruchamiana klawiszem `P` oraz automatycznie po utracie fokusu karty,
@@ -39,9 +39,10 @@ Cel jest prosty: odbijaj piłkę, niszcz cegły i nie pozwól jej spaść pod pa
 - Po zbiciu wszystkich cegieł przechodzisz na następny poziom.
 - Każdy kolejny poziom zwiększa bazową prędkość piłki o 5%.
 - Bazowa prędkość piłki jest teraz wyraźnie niższa niż wcześniej, a na mniejszych ekranach dodatkowo jeszcze spada.
-- **Ceglane kafle** pojawiają się od poziomu `2` w liczbie `2` i podwajają się co `2` poziomy.
-- **Betonowe kafle** pojawiają się od poziomu `3` w liczbie `2` i podwajają się co `3` poziomy.
-- **Kryształowe kafle** pojawiają się od poziomu `4` w liczbie `1` i podwajają się co `4` poziomy.
+- **Ceglane kafle** pojawiają się od poziomu `2`.
+- **Betonowe kafle** pojawiają się od poziomu `4`.
+- **Kryształowe kafle** pojawiają się od poziomu `6`.
+- **Czarne diamenty** pojawiają się od poziomu `8`.
 - Kanwa gry jest zawsze kwadratowa, a układ opiera się na siatce `8` kolumn i `26` rzędów.
 - Wewnątrz kanwy pole gry jest minimalnie mniejsze (`4px` inset z każdej strony), dzięki czemu zewnętrzna obwódka planszy pozostaje czytelna.
 - Kafle mają subtelny odstęp między sobą, a pięć rzędów cegieł zaczyna się od `3.` rzędu siatki, więc nad nimi zostają dwa puste rzędy.
@@ -71,7 +72,7 @@ Cel jest prosty: odbijaj piłkę, niszcz cegły i nie pozwól jej spaść pod pa
 
 Standardowe bonusy są ukryte losowo w zwykłych kaflach i wypadają dopiero po ich zniszczeniu. W grze występują zarówno bonusy pozytywne, jak i negatywne. Na każdym poziomie dostępny jest pełny zestaw standardowych bonusów, ale bez **+1 życia** i **super piłki**. Każdy standardowy bonus pojawia się na planszy dokładnie raz i ma przypisany dokładnie jeden zwykły kafel.
 
-Na wyższych poziomach część zwykłych cegieł zastępowana jest przez trzy klasy trwałych bloków. Od poziomu `2` pojawia się zawsze dokładnie jeden **ceglany** kafel z bonusem `+1 życie`. Od poziomu `4` dochodzi zawsze dokładnie jeden **betonowy** kafel z bonusem `fireball`. Od poziomu `6` dochodzi zawsze dokładnie jeden **kryształowy** kafel z bonusem **super-armaty**. Super-armata trwa `15` sekund, a jej czerwone strzały rozwalają ściany oraz każdy niszczalny kafel jednym trafieniem. Ściany layoutu startują od poziomu `5`, poziomy `5-15` mają własne symetryczne wzory, a potem ten zestaw zapętla się już bez przerw na kolejnych levelach. Aktywna **super piłka / fireball** potrafi zniszczyć również te jasnoszare ściany.
+Na wyższych poziomach część zwykłych cegieł zastępowana jest przez cztery klasy trwałych bloków. Od poziomu `2` pojawia się zawsze dokładnie jeden **ceglany** kafel z bonusem `+1 życie`. Od poziomu `4` dochodzi zawsze dokładnie jeden **betonowy** kafel z bonusem `fireball`. Od poziomu `6` dochodzi zawsze dokładnie jeden **kryształowy** kafel z bonusem **super-armaty**. Od poziomu `8` dochodzi zawsze dokładnie jeden **czarny diament** z `5` punktami wytrzymałości i bonusem **potrójnej armaty**. Potrójna armata trwa `15` sekund i strzela trzema pociskami: środkowy jest super-armatą, a dwa boczne to zwykłe strzały z lewej i prawej części rakietki. Super-armata trwa `15` sekund, a jej czerwone strzały rozwalają ściany oraz każdy niszczalny kafel jednym trafieniem. Ściany layoutu startują od poziomu `5`, poziomy `5-15` mają własne symetryczne wzory, a potem ten zestaw zapętla się już bez przerw na kolejnych levelach. Aktywna **super piłka / fireball** potrafi zniszczyć również te jasnoszare ściany.
 
 ### Pozytywne
 
@@ -81,6 +82,7 @@ Na wyższych poziomach część zwykłych cegieł zastępowana jest przez trzy k
 - **+1 życie** — zwiększa liczbę żyć, maksymalnie do 3.
 - **Fireball** — przez 5 sekund piłka przebija cegły i niszczy nawet jasnoszare ściany layoutu.
 - **Super-armata** — przez `15` sekund daje czerwone strzały, które niszczą ściany oraz każdy niszczalny kafel jednym trafieniem.
+- **Potrójna armata** — przez `15` sekund daje trzy lufy: czerwony super-strzał w środku oraz dwa zwykłe strzały po bokach rakietki.
 - **Spowolnienie piłki** — tymczasowo zmniejsza prędkość aż o połowę i daje mocniejsze smużenie.
 
 ### Negatywne
