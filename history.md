@@ -203,3 +203,4 @@ Plik utrzymywany na bieżąco. Każde kolejne polecenie użytkownika w tej sesji
 196. `fix: iPhone silent/media unlock wykonuje sie tylko do pierwszego skutecznego odblokowania i nie odpala sie ponownie przy kolejnych akcjach`
 197. `fix: rozdzielamy iOS media unlock od zwyklego Web Audio resume; wolniejszy unlock kanału media uruchamia sie tylko z pierwszego gestu i nie dokleja sie do kazdej akcji`
 198. `fix: radykalny rollback audio - wracamy do pierwszej wersji SFX z 1.4.0 i usuwamy pozniejsze hacki odblokowania/fallbacku, ktore dokladaly opoznienie`
+199. `2 fixy: cegly wisza o jeden rzad nizej i zostawiaja nad soba dwa puste rzędy; layout scian przechodzi na 12-poziomowy cykl z pozycjami (2,9), (7,9), (4,10), (5,10), (2,11), (7,11)`

@@ -42,10 +42,10 @@ Cel jest prosty: odbijaj piłkę, niszcz cegły i nie pozwól jej spaść pod pa
 - **Kryształowe kafle** pojawiają się od poziomu `4` w liczbie `1` i podwajają się co `4` poziomy.
 - Kanwa gry jest zawsze kwadratowa, a układ opiera się na siatce `8` kolumn i `26` rzędów.
 - Wewnątrz kanwy pole gry jest minimalnie mniejsze (`4px` inset z każdej strony), dzięki czemu zewnętrzna obwódka planszy pozostaje czytelna.
-- Kafle mają subtelny odstęp między sobą, a pięć rzędów cegieł zaczyna się od `2.` rzędu siatki.
+- Kafle mają subtelny odstęp między sobą, a pięć rzędów cegieł zaczyna się od `3.` rzędu siatki, więc nad nimi zostają dwa puste rzędy.
 - Startowa paletka ma szerokość `1` kafla i wysokość `1/2` kafla.
 - Paletka startowo wisi w dolnym rzędzie aktywnego pola gry.
-- Plansza ma też progresję **niezniszczalnych jasnoszarych ścian**; startują od poziomu 3 i są dokładane pojedynczo co 3 levele w dolnym rzędzie layoutu.
+- Plansza ma też progresję **niezniszczalnych jasnoszarych ścian** w cyklu `12` poziomów; od poziomu `2` dochodzą kolejne kafle na poziomach `2`, `4`, `6`, `8`, `10` i `12`, a potem układ zaczyna się od nowa.
 - Po utracie życia aktywne bonusy znikają.
 - Po zakończeniu gry możesz zapisać wynik, ale tylko wtedy, gdy trafia do **pierwszej dziesiątki**.
 
@@ -68,7 +68,7 @@ Cel jest prosty: odbijaj piłkę, niszcz cegły i nie pozwól jej spaść pod pa
 
 Standardowe bonusy są ukryte losowo w zwykłych kaflach i wypadają dopiero po ich zniszczeniu. W grze występują zarówno bonusy pozytywne, jak i negatywne. Na każdym poziomie dostępny jest pełny zestaw standardowych bonusów, ale bez **+1 życia** i **super piłki**. Każdy standardowy bonus pojawia się na planszy dokładnie raz i ma przypisany dokładnie jeden zwykły kafel.
 
-Na wyższych poziomach część zwykłych cegieł zastępowana jest przez trzy klasy trwałych bloków. **Ceglane** wymagają `2` trafień i ukrywają sprawiedliwie rozdzielone super-bonusy `+1 życie` oraz `utrata życia`. **Betonowe** wymagają `3` trafień i rozdzielają po równo `fireball` oraz negatywną `piłkę ping-pong`, która podwaja liczbę trafień potrzebnych do zbicia aktywnych kafli. **Kryształowe** wymagają `4` trafień i każdy z nich daje zawsze pozytywny bonus `+1 życie + fireball`. Ściany layoutu startują od poziomu `3` i dokładane są co `3` levele w kolejności: `(7,1)`, `(7,8)`, `(7,2)`, `(7,7)`, `(7,3)`, `(7,6)`, `(7,4)`, `(7,5)`. Po dojściu do pełnego rzędu nic więcej już nie dochodzi. Aktywna **super piłka / fireball** potrafi zniszczyć również te jasnoszare ściany.
+Na wyższych poziomach część zwykłych cegieł zastępowana jest przez trzy klasy trwałych bloków. **Ceglane** wymagają `2` trafień i ukrywają sprawiedliwie rozdzielone super-bonusy `+1 życie` oraz `utrata życia`. **Betonowe** wymagają `3` trafień i rozdzielają po równo `fireball` oraz negatywną `piłkę ping-pong`, która podwaja liczbę trafień potrzebnych do zbicia aktywnych kafli. **Kryształowe** wymagają `4` trafień i każdy z nich daje zawsze pozytywny bonus `+1 życie + fireball`. Ściany layoutu działają w cyklu `12` poziomów i dochodzą kolejno w pozycjach `(2,9)`, `(7,9)`, `(4,10)`, `(5,10)`, `(2,11)` oraz `(7,11)`, po czym cały wzór powtarza się od nowa. Aktywna **super piłka / fireball** potrafi zniszczyć również te jasnoszare ściany.
 
 ### Pozytywne
 

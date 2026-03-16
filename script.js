@@ -38,7 +38,7 @@ const CANVAS_EDGE_MARGIN = 12;
 const GRID_COLUMNS = 8;
 const GRID_ROWS = 26;
 const BRICK_ROW_COUNT = 5;
-const BRICK_START_ROW = 1;
+const BRICK_START_ROW = 2;
 const PLAYFIELD_INSET = 4;
 
 function formatVersionFromHistoryEntry(entryNumber) {
@@ -374,22 +374,22 @@ function getCanvasMetrics() {
 }
 
 const wallTileSequence = [
-  { row: 6, column: 0 },
-  { row: 6, column: 7 },
-  { row: 6, column: 1 },
-  { row: 6, column: 6 },
-  { row: 6, column: 2 },
-  { row: 6, column: 5 },
-  { row: 6, column: 3 },
-  { row: 6, column: 4 },
+  { row: 8, column: 1 },
+  { row: 8, column: 6 },
+  { row: 9, column: 3 },
+  { row: 9, column: 4 },
+  { row: 10, column: 1 },
+  { row: 10, column: 6 },
 ];
 
 function getLayoutWallTiles() {
-  if (game.level < 3) {
+  const levelInCycle = ((Math.max(1, game.level) - 1) % 12) + 1;
+
+  if (levelInCycle < 2) {
     return [];
   }
 
-  const wallCount = Math.min(1 + Math.floor((game.level - 3) / 3), wallTileSequence.length);
+  const wallCount = Math.min(Math.floor(levelInCycle / 2), wallTileSequence.length);
   return wallTileSequence.slice(0, wallCount);
 }
 
