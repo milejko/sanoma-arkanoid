@@ -217,3 +217,4 @@ Plik utrzymywany na bieżąco. Każde kolejne polecenie użytkownika w tej sesji
 210. `2 poprawki balansu: super-armata z krysztalu trwa 15 sekund; sciany layoutu zaczynaja pojawiac sie dopiero od poziomu 5`
 211. `fix: sciany dostaja wiecej roznych wzorow w cyklu poziomow 5-12 zamiast prostego dokladania jednego ukladu`
 212. `fix: dopracowujemy wzory scian, zeby byly bardziej charakterystyczne - np. brama, filary, klepsydra i zygzak`
+213. `fix: zwykle kafle dostaja bardziej teczowa palete, ale odsunieta od kolorow ceglanego, betonowego, krysztalowego i scian`

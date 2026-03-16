@@ -2442,7 +2442,13 @@ function drawProjectiles() {
 }
 
 function drawBricks() {
-  const rowColors = ["#ff7a18", "#ff3d81", "#8b5cff", "#39ff88", "#21d4fd"];
+  const standardBrickPalettes = [
+    { base: "#ff4fa3", glow: "rgba(255, 79, 163, 0.42)", light: "rgba(255, 225, 241, 0.46)", dark: "rgba(110, 17, 63, 0.34)", insetLight: "rgba(255, 214, 232, 0.24)", insetMid: "rgba(255, 105, 180, 0.12)", insetDark: "rgba(76, 5, 25, 0.16)" },
+    { base: "#a855f7", glow: "rgba(168, 85, 247, 0.42)", light: "rgba(243, 232, 255, 0.45)", dark: "rgba(76, 29, 149, 0.34)", insetLight: "rgba(233, 213, 255, 0.24)", insetMid: "rgba(192, 132, 252, 0.12)", insetDark: "rgba(59, 7, 100, 0.16)" },
+    { base: "#6366f1", glow: "rgba(99, 102, 241, 0.42)", light: "rgba(224, 231, 255, 0.45)", dark: "rgba(49, 46, 129, 0.34)", insetLight: "rgba(199, 210, 254, 0.24)", insetMid: "rgba(129, 140, 248, 0.12)", insetDark: "rgba(30, 27, 75, 0.16)" },
+    { base: "#22c55e", glow: "rgba(34, 197, 94, 0.42)", light: "rgba(220, 252, 231, 0.44)", dark: "rgba(20, 83, 45, 0.34)", insetLight: "rgba(187, 247, 208, 0.22)", insetMid: "rgba(74, 222, 128, 0.12)", insetDark: "rgba(5, 46, 22, 0.16)" },
+    { base: "#e879f9", glow: "rgba(232, 121, 249, 0.42)", light: "rgba(250, 232, 255, 0.46)", dark: "rgba(134, 25, 143, 0.34)", insetLight: "rgba(245, 208, 254, 0.24)", insetMid: "rgba(240, 171, 252, 0.12)", insetDark: "rgba(74, 4, 78, 0.16)" },
+  ];
   const bevel = Math.max(1.5, Math.min(getTileHeight() * 0.22, 4));
 
   for (const brick of bricks) {
@@ -2455,6 +2461,7 @@ function drawBricks() {
     const isCrystalBrick = brick.material === "crystal";
     const isWallBrick = brick.material === "wall";
     const colorRow = Math.max(0, brick.row - BRICK_START_ROW);
+    const standardPalette = standardBrickPalettes[colorRow % standardBrickPalettes.length];
     const baseColor = isWallBrick
         ? "#d1d5db"
         : isCrystalBrick
@@ -2463,7 +2470,7 @@ function drawBricks() {
         ? "#6b7280"
         : isBrickBrick
         ? "#c2410c"
-        : rowColors[colorRow % rowColors.length];
+        : standardPalette.base;
     const face = context.createLinearGradient(
       brick.x,
       brick.y,
@@ -2480,11 +2487,11 @@ function drawBricks() {
           ? "rgba(255, 255, 255, 0.28)"
           : isBrickBrick
           ? "rgba(255, 237, 213, 0.38)"
-          : "rgba(255, 255, 255, 0.34)"
+          : standardPalette.light
     );
     face.addColorStop(0.15, baseColor);
     face.addColorStop(0.48, baseColor);
-    face.addColorStop(0.72, isCrystalBrick ? "#22d3ee" : isBrickBrick ? "#ea580c" : baseColor);
+    face.addColorStop(0.72, isCrystalBrick ? "#22d3ee" : isBrickBrick ? "#ea580c" : standardPalette.base);
     face.addColorStop(
       1,
       isWallBrick
@@ -2495,7 +2502,7 @@ function drawBricks() {
           ? "rgba(31, 41, 55, 0.38)"
           : isBrickBrick
           ? "rgba(124, 45, 18, 0.36)"
-          : "rgba(10, 14, 28, 0.32)"
+          : standardPalette.dark
     );
 
     context.shadowColor = isWallBrick
@@ -2504,9 +2511,9 @@ function drawBricks() {
         ? "rgba(34, 211, 238, 0.45)"
         : isConcreteBrick
         ? "rgba(107, 114, 128, 0.42)"
-        : isBrickBrick
-        ? "rgba(194, 65, 12, 0.4)"
-        : `${baseColor}66`;
+          : isBrickBrick
+          ? "rgba(194, 65, 12, 0.4)"
+          : standardPalette.glow;
     context.shadowBlur = 14;
     context.shadowOffsetY = 4;
     context.fillStyle = face;
@@ -2520,9 +2527,9 @@ function drawBricks() {
         ? "rgba(240, 253, 255, 0.56)"
         : isConcreteBrick
         ? "rgba(255, 255, 255, 0.32)"
-        : isBrickBrick
-        ? "rgba(255, 237, 213, 0.42)"
-        : "rgba(255, 255, 255, 0.45)";
+          : isBrickBrick
+          ? "rgba(255, 237, 213, 0.42)"
+          : standardPalette.light;
     context.fillRect(brick.x + bevel, brick.y + bevel, brick.width - bevel * 2, 2);
     context.fillRect(brick.x + bevel, brick.y + bevel, 2, brick.height - bevel * 2);
 
@@ -2532,9 +2539,9 @@ function drawBricks() {
         ? "rgba(8, 47, 73, 0.3)"
         : isConcreteBrick
         ? "rgba(31, 41, 55, 0.34)"
-        : isBrickBrick
-        ? "rgba(124, 45, 18, 0.28)"
-        : "rgba(3, 7, 18, 0.3)";
+          : isBrickBrick
+          ? "rgba(124, 45, 18, 0.28)"
+          : standardPalette.dark;
     context.fillRect(
       brick.x + bevel,
       brick.y + brick.height - bevel - 2,
@@ -2564,7 +2571,7 @@ function drawBricks() {
           ? "rgba(255, 255, 255, 0.14)"
           : isBrickBrick
           ? "rgba(254, 215, 170, 0.18)"
-          : "rgba(255, 255, 255, 0.26)"
+          : standardPalette.insetLight
     );
     inset.addColorStop(
       0.4,
@@ -2576,7 +2583,7 @@ function drawBricks() {
           ? "rgba(255, 255, 255, 0.05)"
           : isBrickBrick
           ? "rgba(251, 146, 60, 0.1)"
-          : "rgba(255, 255, 255, 0.1)"
+          : standardPalette.insetMid
     );
     inset.addColorStop(
       1,
@@ -2588,7 +2595,7 @@ function drawBricks() {
           ? "rgba(15, 23, 42, 0.18)"
           : isBrickBrick
           ? "rgba(124, 45, 18, 0.12)"
-          : "rgba(4, 10, 24, 0.16)"
+          : standardPalette.insetDark
     );
     context.fillStyle = inset;
     context.fillRect(
