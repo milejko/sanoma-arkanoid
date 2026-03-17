@@ -6,26 +6,26 @@
     <title>Arkanoid</title>
     <script>
       (() => {
-        const historyEntryNumber = 223;
+        const historyEntryNumber = 224;
         const major = Math.floor(historyEntryNumber / 100);
         const minor = Math.floor((historyEntryNumber % 100) / 10);
         const patch = historyEntryNumber % 10;
         const version = `${major}.${minor}.${patch}`;
-        const lastUpdated = "17.03.2026 16:34";
+        const lastUpdated = "17.03.2026 16:41";
         window.APP_HISTORY_ENTRY_NUMBER = historyEntryNumber;
         window.APP_VERSION = version;
         window.APP_LAST_UPDATED = lastUpdated;
         const supportedLocales = ["pl", "en", "nl", "sv", "fi"];
         const browserLanguages = Array.isArray(navigator.languages) && navigator.languages.length
           ? navigator.languages
-          : [navigator.language || "pl"];
+          : [navigator.language || "en"];
         const localeCandidates = browserLanguages.flatMap((languageTag) => {
           const normalized = String(languageTag || "").toLowerCase();
           const baseLanguage = normalized.split("-")[0];
           return normalized && normalized !== baseLanguage ? [normalized, baseLanguage] : [baseLanguage];
         });
         window.APP_LOCALE =
-          localeCandidates.find((candidate) => supportedLocales.includes(candidate)) || "pl";
+          localeCandidates.find((candidate) => supportedLocales.includes(candidate)) || "en";
 
         const stylesheet = document.createElement("link");
         stylesheet.rel = "stylesheet";
@@ -144,7 +144,7 @@
     <script>
       (() => {
         const version = encodeURIComponent(window.APP_VERSION || "0.0.0");
-        const fallbackLocale = "pl";
+        const fallbackLocale = "en";
         const appendAppScript = () => {
           const appScript = document.createElement("script");
           appScript.src = `script.js?v=${version}`;

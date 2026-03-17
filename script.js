@@ -73,7 +73,7 @@ const APP_LAST_UPDATED =
 const APP_LOCALE =
   typeof window.APP_LOCALE === "string" && window.APP_LOCALE
     ? window.APP_LOCALE
-    : "pl";
+    : "en";
 const localeData =
   window.ARKANOID_LOCALE_DATA && typeof window.ARKANOID_LOCALE_DATA === "object"
     ? window.ARKANOID_LOCALE_DATA
