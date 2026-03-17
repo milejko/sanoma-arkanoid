@@ -229,3 +229,4 @@ Plik utrzymywany na bieżąco. Każde kolejne polecenie użytkownika w tej sesji
 222. `feat: od poziomu 8 dochodzi czarny diament na 5 trafien z bonusem potrojnej armaty - srodkowy strzal jest super, boczne sa zwykle`
 223. `feat: interfejs dostaje zewnetrzne pliki locale i auto-wybor jezyka przegladarki dla pl/en/nl/sv/fi`
 224. `fix: domyslny fallback jezyka zmieniamy z polskiego na angielski`
+225. `fix: upraszczamy fizyke pilki i usuwamy aktywne podkrecanie, zeby po odbiciu nie leciala lukiem`

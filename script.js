@@ -1486,7 +1486,7 @@ function bounceBallFromBrick(previousX, previousY, brick) {
     ball.velocityX = wasLeftOfBrick
       ? -Math.abs(ball.velocityX)
       : Math.abs(ball.velocityX);
-    ball.spin *= 0.94;
+    ball.spin = 0;
     return;
   }
 
@@ -1497,7 +1497,7 @@ function bounceBallFromBrick(previousX, previousY, brick) {
     ball.velocityY = wasAboveBrick
       ? -Math.abs(ball.velocityY)
       : Math.abs(ball.velocityY);
-    ball.spin *= 0.97;
+    ball.spin = 0;
     return;
   }
 
@@ -1509,7 +1509,7 @@ function bounceBallFromBrick(previousX, previousY, brick) {
     ball.velocityX = ballIsLeftOfBrickCenter
       ? -Math.abs(ball.velocityX)
       : Math.abs(ball.velocityX);
-    ball.spin *= 0.94;
+    ball.spin = 0;
     return;
   }
 
@@ -1520,7 +1520,7 @@ function bounceBallFromBrick(previousX, previousY, brick) {
   ball.velocityY = ballIsAboveBrickCenter
     ? -Math.abs(ball.velocityY)
     : Math.abs(ball.velocityY);
-  ball.spin *= 0.97;
+  ball.spin = 0;
 }
 
 function getBasePaddleWidth() {
@@ -1594,7 +1594,6 @@ function syncBallSpeedWithBaseSpeed(previousBaseSpeed) {
   const velocityRatio = nextBaseSpeed / previousBaseSpeed;
   ball.velocityX *= velocityRatio;
   ball.velocityY *= velocityRatio;
-  ball.spin *= velocityRatio;
 }
 
 function advanceToNextLevel() {
@@ -1700,7 +1699,7 @@ function launchBall() {
   ball.stickyAutoLaunchTimer = 0;
   ball.velocityX = baseSpeed * (Math.random() > 0.5 ? 1 : -1) * 0.75;
   ball.velocityY = -baseSpeed;
-  ball.spin = ball.velocityX * 0.08;
+  ball.spin = 0;
   ball.trail = [];
   game.running = true;
   game.message = "";
@@ -1802,8 +1801,6 @@ function bounceOffPaddle() {
     -maxHorizontalSpeed,
     Math.min(maxHorizontalSpeed, nextVelocityX)
   );
-  const spinFromHit = clampedOffset * 180;
-  const spinFromPaddle = Math.max(-140, Math.min(140, paddle.velocityX * 0.18));
   const impactOffsetX = ball.x - (paddle.x + paddle.width / 2);
 
   ball.y = paddle.y - ball.radius;
@@ -1811,10 +1808,7 @@ function bounceOffPaddle() {
   ball.velocityY = -Math.sqrt(
     Math.max(speed * speed - nextVelocityX * nextVelocityX, 0)
   );
-  ball.spin = Math.max(
-    -260,
-    Math.min(260, ball.spin * 0.35 + spinFromHit + spinFromPaddle)
-  );
+  ball.spin = 0;
   playSound("paddleHit");
 
   if (effects.stickyActive) {
@@ -1832,19 +1826,19 @@ function bounceOffWalls() {
   if (ball.x + ball.radius >= rightBoundary) {
     ball.x = rightBoundary - ball.radius;
     ball.velocityX *= -1;
-    ball.spin *= 0.92;
+    ball.spin = 0;
     playSound("paddleHit");
   } else if (ball.x - ball.radius <= leftBoundary) {
     ball.x = leftBoundary + ball.radius;
     ball.velocityX *= -1;
-    ball.spin *= 0.92;
+    ball.spin = 0;
     playSound("paddleHit");
   }
 
   if (ball.y - ball.radius <= topBoundary) {
     ball.y = topBoundary + ball.radius;
     ball.velocityY *= -1;
-    ball.spin *= 0.96;
+    ball.spin = 0;
     playSound("paddleHit");
   }
 }
@@ -2036,7 +2030,6 @@ function activateBonus(type) {
     if (!ball.attached) {
       ball.velocityX *= velocityRatio;
       ball.velocityY *= velocityRatio;
-      ball.spin *= velocityRatio;
     }
   } else if (type === "speedTriple") {
     const previousSpeedFactor = 1 + effects.speedModifier;
@@ -2046,7 +2039,6 @@ function activateBonus(type) {
     if (!ball.attached) {
       ball.velocityX *= velocityRatio;
       ball.velocityY *= velocityRatio;
-      ball.spin *= velocityRatio;
     }
   }
 
@@ -2110,7 +2102,6 @@ function updateEffects(deltaSeconds) {
         const velocityRatio = (1 + effects.speedModifier) / previousSpeedFactor;
         ball.velocityX *= velocityRatio;
         ball.velocityY *= velocityRatio;
-        ball.spin *= velocityRatio;
       }
     }
   }
@@ -2213,24 +2204,6 @@ function updateProjectiles(deltaSeconds) {
 function updateBall(deltaSeconds) {
   if (ball.attached) {
     return;
-  }
-
-  if (ball.spin !== 0) {
-    ball.velocityX += ball.spin * deltaSeconds;
-
-    const maxHorizontalSpeed = Math.max(
-      Math.abs(ball.velocityY) * 1.35,
-      getCurrentBallBaseSpeed()
-    );
-    ball.velocityX = Math.max(
-      -maxHorizontalSpeed,
-      Math.min(maxHorizontalSpeed, ball.velocityX)
-    );
-    ball.spin *= Math.max(0, 1 - 1.35 * deltaSeconds);
-
-    if (Math.abs(ball.spin) < 4) {
-      ball.spin = 0;
-    }
   }
 
   const previousX = ball.x;
