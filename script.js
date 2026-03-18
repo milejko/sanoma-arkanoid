@@ -115,7 +115,7 @@ function t(key, parameters = {}, fallback = key) {
 }
 
 function getLevelMessage(level) {
-  return t("messages.level", { level }, `Poziom ${level}`);
+  return t("messages.level", { level });
 }
 
 function applyStaticTranslations() {
@@ -582,52 +582,52 @@ function getBrickTopOffset() {
 
 const bonusCatalog = {
   widen: {
-    label: t("bonus.widen", {}, "Paletka +50%"),
+    label: t("bonus.widen"),
     symbol: "+",
     color: "#facc15",
   },
   sticky: {
-    label: t("bonus.sticky", {}, "Klej"),
+    label: t("bonus.sticky"),
     symbol: "K",
     color: "#fb7185",
   },
   shooter: {
-    label: t("bonus.shooter", {}, "Działo"),
+    label: t("bonus.shooter"),
     symbol: "S",
     color: "#38bdf8",
   },
   extraLife: {
-    label: t("bonus.extraLife", {}, "+1 życie"),
+    label: t("bonus.extraLife"),
     symbol: "L",
     color: "#f472b6",
   },
   superBall: {
-    label: t("bonus.superBall", {}, "Fireball"),
+    label: t("bonus.superBall"),
     symbol: "*",
     color: "#ef4444",
   },
   crystalCombo: {
-    label: t("bonus.crystalCombo", {}, "Super-armata"),
+    label: t("bonus.crystalCombo"),
     symbol: "SA",
     color: "#67e8f9",
   },
   blackDiamondCombo: {
-    label: t("bonus.blackDiamondCombo", {}, "Potrójna armata"),
+    label: t("bonus.blackDiamondCombo"),
     symbol: "3A",
     color: "#94a3b8",
   },
   shrinkHalf: {
-    label: t("bonus.shrinkHalf", {}, "Paletka -50%"),
+    label: t("bonus.shrinkHalf"),
     symbol: "-",
     color: "#f87171",
   },
   speedDouble: {
-    label: t("bonus.speedDouble", {}, "Piłka -50%"),
+    label: t("bonus.speedDouble"),
     symbol: ">",
     color: "#f97316",
   },
   speedTriple: {
-    label: t("bonus.speedTriple", {}, "Piłka +25%"),
+    label: t("bonus.speedTriple"),
     symbol: ">>",
     color: "#ef4444",
   },
@@ -672,14 +672,14 @@ function detectDeviceTypeFromResolution() {
 
 function getDeviceTypeLabel(deviceType) {
   if (deviceType === "phone") {
-    return t("devices.phone", {}, "Telefon");
+    return t("devices.phone");
   }
 
   if (deviceType === "tablet") {
-    return t("devices.tablet", {}, "Tablet");
+    return t("devices.tablet");
   }
 
-  return t("devices.computer", {}, "Komputer");
+  return t("devices.computer");
 }
 
 function createDeviceTypeIconElement(deviceType) {
@@ -707,7 +707,7 @@ function normalizeHighScoreEntry(entry) {
   }
 
   return {
-    name: name || "ANONIM",
+    name: name || t("common.anonymous"),
     deviceType: normalizeDeviceType(entry.deviceType ?? entry.device_type),
     level,
     score,
@@ -763,7 +763,7 @@ function loadCachedHighScores() {
 
     return normalizeHighScoreEntries(cachedEntries);
   } catch (error) {
-    console.warn("Nie udało się odczytać lokalnej kopii leaderboardu.", error);
+    console.warn(t("leaderboard.errors.cacheReadFailed"), error);
     window.localStorage.removeItem(LEADERBOARD_CACHE_KEY);
     return [];
   }
@@ -818,7 +818,7 @@ function getLeaderboardStatusMessage() {
     return {
       kind: "loading",
       tone: "info",
-      label: t("leaderboard.saving", {}, "Zapisywanie"),
+      label: t("leaderboard.saving"),
     };
   }
 
@@ -826,7 +826,7 @@ function getLeaderboardStatusMessage() {
     return {
       kind: "loading",
       tone: "info",
-      label: t("leaderboard.loading", {}, "Ładowanie"),
+      label: t("leaderboard.loading"),
     };
   }
 
@@ -867,7 +867,7 @@ function renderLeaderboardStatus() {
     leaderboardStatusElement.classList.add("leaderboard-status-loading");
     const dots = document.createElement("span");
     dots.className = "loading-dots";
-    dots.setAttribute("aria-label", status.label || t("leaderboard.loading", {}, "Ładowanie"));
+    dots.setAttribute("aria-label", status.label || t("leaderboard.loading"));
 
     for (let index = 0; index < 3; index += 1) {
       const dot = document.createElement("span");
@@ -891,19 +891,19 @@ function parseLeaderboardPayload(payload) {
   }
 
   if (!payload || typeof payload !== "object") {
-    throw new Error(t("leaderboard.errors.invalidPayload", {}, "Nieprawidłowa odpowiedź backendu leaderboardu."));
+    throw new Error(t("leaderboard.errors.invalidPayload"));
   }
 
   if (payload.ok === false) {
     throw new Error(
       typeof payload.error === "string" && payload.error
         ? payload.error
-        : t("leaderboard.errors.backendError", {}, "Backend leaderboardu zwrócił błąd.")
+        : t("leaderboard.errors.backendError")
     );
   }
 
   if (!Array.isArray(payload.entries)) {
-    throw new Error(t("leaderboard.errors.missingEntries", {}, "Backend leaderboardu nie zwrócił listy wyników."));
+    throw new Error(t("leaderboard.errors.missingEntries"));
   }
 
   return normalizeHighScoreEntries(payload.entries);
@@ -914,8 +914,7 @@ async function fetchLeaderboardEntries() {
     throw new Error(
       t(
         "leaderboard.errors.notConfigured",
-        {},
-        "Backend leaderboardu nie jest jeszcze skonfigurowany. Ustaw adres projektu Supabase i anon key."
+        {}
       )
     );
   }
@@ -935,7 +934,7 @@ async function fetchLeaderboardEntries() {
   );
 
   if (!response.ok) {
-    throw new Error(t("leaderboard.errors.fetchStatus", { status: response.status }, `Nie udało się pobrać wyników (${response.status}).`));
+    throw new Error(t("leaderboard.errors.fetchStatus", { status: response.status }));
   }
 
   return parseLeaderboardPayload(await response.json());
@@ -958,9 +957,9 @@ async function refreshHighScores() {
     const errorMessage =
       error instanceof Error
         ? error.message
-        : t("leaderboard.errors.fetchGeneric", {}, "Nie udało się pobrać leaderboardu.");
+        : t("leaderboard.errors.fetchGeneric");
     leaderboardState.statusMessage = leaderboardState.showingCachedCopy
-      ? t("leaderboard.cachedFallback", { error: errorMessage }, `${errorMessage} Wyświetlam lokalną kopię wyników.`)
+      ? t("leaderboard.cachedFallback", { error: errorMessage })
       : errorMessage;
     leaderboardState.statusTone = leaderboardState.showingCachedCopy ? "info" : "error";
   } finally {
@@ -974,8 +973,7 @@ async function persistHighScore(entry) {
     throw new Error(
       t(
         "leaderboard.errors.notConfigured",
-        {},
-        "Backend leaderboardu nie jest jeszcze skonfigurowany. Ustaw adres projektu Supabase i anon key."
+        {}
       )
     );
   }
@@ -995,7 +993,7 @@ async function persistHighScore(entry) {
   });
 
   if (!response.ok) {
-    throw new Error(t("leaderboard.errors.saveStatus", { status: response.status }, `Nie udało się zapisać wyniku (${response.status}).`));
+    throw new Error(t("leaderboard.errors.saveStatus", { status: response.status }));
   }
 
   return fetchLeaderboardEntries();
@@ -1048,30 +1046,27 @@ function renderLeaderboard() {
   }
 
   leaderboardTitleElement.textContent = isGameOver
-    ? t("leaderboard.gameOverTitle", {}, "Koniec gry")
-    : t("leaderboard.title", {}, "Tablica wyników");
+    ? t("leaderboard.gameOverTitle")
+    : t("leaderboard.title");
   leaderboardSubtitleElement.textContent = isGameOver
     ? shouldShowForm
       ? t(
           "leaderboard.savePrompt",
-          { level: game.level, score: game.score },
-          `Wpisz imię i zapisz wynik: level ${game.level}, ${game.score} pkt.`
+          { level: game.level, score: game.score }
         )
       : leaderboardState.scoreSaved
         ? t(
             "leaderboard.savedSummary",
-            { level: game.level, score: game.score },
-            `Wynik zapisany. Level ${game.level}, ${game.score} pkt.`
+            { level: game.level, score: game.score }
           )
         : t(
             "leaderboard.outOfTop",
-            { max: MAX_HIGH_SCORES, level: game.level, score: game.score },
-            `Poza top ${MAX_HIGH_SCORES}. Level ${game.level}, ${game.score} pkt.`
+            { max: MAX_HIGH_SCORES, level: game.level, score: game.score }
           )
     : "";
   leaderboardStartButton.textContent = isIntro
-    ? t("common.start", {}, "Start")
-    : t("common.newGame", {}, "Nowa gra");
+    ? t("common.start")
+    : t("common.newGame");
   scoreFormElement.classList.toggle("hidden", !shouldShowForm);
   playerNameInput.disabled = leaderboardState.saving;
   scoreSubmitButton.disabled = leaderboardState.saving;
@@ -1094,11 +1089,11 @@ function renderStartOverlay() {
 
   startOverlayTitleElement.textContent = game.message;
   if (game.startOverlayMode === "continue") {
-    startOverlaySubtitleElement.textContent = t("start.subtitleContinue", {}, "Nic straconego. 🙂");
-    startOverlayButton.textContent = t("common.continue", {}, "Kontynuuj");
+    startOverlaySubtitleElement.textContent = t("start.subtitleContinue");
+    startOverlayButton.textContent = t("common.continue");
   } else {
-    startOverlaySubtitleElement.textContent = t("start.subtitleStart", {}, "Zaczynamy? 🚀");
-    startOverlayButton.textContent = t("common.start", {}, "Start");
+    startOverlaySubtitleElement.textContent = t("start.subtitleStart");
+    startOverlayButton.textContent = t("common.start");
   }
 }
 
@@ -1164,11 +1159,7 @@ function showLeaderboard(mode) {
   }
 
   if (useCachedHighScores() && !leaderboardState.loading && !leaderboardState.saving) {
-    leaderboardState.statusMessage = t(
-      "leaderboard.showingCachedCopy",
-      {},
-      "Wyświetlam lokalną kopię tablicy wyników."
-    );
+    leaderboardState.statusMessage = t("leaderboard.showingCachedCopy");
     leaderboardState.statusTone = "info";
   } else if (!leaderboardState.loading && !leaderboardState.saving) {
     leaderboardState.statusMessage = "";
@@ -1224,11 +1215,10 @@ async function saveCurrentScore() {
   } catch (error) {
     leaderboardState.statusMessage =
       error instanceof Error
-        ? t("leaderboard.saveRetained", { error: error.message }, `${error.message} Wynik pozostał w lokalnej kopii.`)
+        ? t("leaderboard.saveRetained", { error: error.message })
         : t(
             "leaderboard.saveBackendFailed",
-            {},
-            "Nie udało się zapisać wyniku w backendzie leaderboardu. Wynik pozostał w lokalnej kopii."
+            {}
           );
     leaderboardState.statusTone = "info";
   } finally {
@@ -1790,7 +1780,7 @@ function resetRound() {
   game.message =
     game.lives > 0
       ? getLevelMessage(game.level)
-      : t("messages.gameOver", {}, "Koniec gry");
+      : t("messages.gameOver");
   game.startOverlayMode = isLifeContinuation ? "continue" : "levelStart";
   renderStartOverlay();
   renderPauseOverlay();

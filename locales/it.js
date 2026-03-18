@@ -12,6 +12,7 @@ window.ARKANOID_LOCALE_DATA = {
     lives: "Vite",
   },
   common: {
+    anonymous: "Anonimo",
     start: "Avvia",
     newGame: "Nuova partita",
     continue: "Continua",
@@ -58,6 +59,7 @@ window.ARKANOID_LOCALE_DATA = {
     saveRetained: "{error} Il punteggio è rimasto nella cache locale.",
     saveBackendFailed: "Impossibile salvare il punteggio nel backend della classifica. Il punteggio è rimasto nella cache locale.",
     errors: {
+      cacheReadFailed: "Impossibile leggere la copia locale in cache della classifica.",
       invalidPayload: "Risposta non valida dal backend della classifica.",
       backendError: "Il backend della classifica ha restituito un errore.",
       missingEntries: "Il backend della classifica non ha restituito una lista di punteggi.",

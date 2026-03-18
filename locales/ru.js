@@ -12,6 +12,7 @@ window.ARKANOID_LOCALE_DATA = {
     lives: "Жизни",
   },
   common: {
+    anonymous: "Аноним",
     start: "Старт",
     newGame: "Новая игра",
     continue: "Продолжить",
@@ -58,6 +59,7 @@ window.ARKANOID_LOCALE_DATA = {
     saveRetained: "{error} Результат остался в локальном кэше.",
     saveBackendFailed: "Не удалось сохранить результат в backend таблицы рекордов. Результат остался в локальном кэше.",
     errors: {
+      cacheReadFailed: "Не удалось прочитать локальную кэш-копию таблицы рекордов.",
       invalidPayload: "Некорректный ответ от backend таблицы рекордов.",
       backendError: "Backend таблицы рекордов вернул ошибку.",
       missingEntries: "Backend таблицы рекордов не вернул список результатов.",

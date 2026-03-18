@@ -12,6 +12,7 @@ window.ARKANOID_LOCALE_DATA = {
     lives: "Lives",
   },
   common: {
+    anonymous: "Anonymous",
     start: "Start",
     newGame: "New game",
     continue: "Continue",
@@ -58,6 +59,7 @@ window.ARKANOID_LOCALE_DATA = {
     saveRetained: "{error} The score stayed in the local cache.",
     saveBackendFailed: "Couldn't save the score to the leaderboard backend. The score stayed in the local cache.",
     errors: {
+      cacheReadFailed: "Could not read the local cached leaderboard copy.",
       invalidPayload: "Invalid leaderboard backend response.",
       backendError: "The leaderboard backend returned an error.",
       missingEntries: "The leaderboard backend did not return a score list.",

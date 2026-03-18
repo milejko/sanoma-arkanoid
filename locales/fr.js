@@ -12,6 +12,7 @@ window.ARKANOID_LOCALE_DATA = {
     lives: "Vies",
   },
   common: {
+    anonymous: "Anonyme",
     start: "Démarrer",
     newGame: "Nouvelle partie",
     continue: "Continuer",
@@ -58,6 +59,7 @@ window.ARKANOID_LOCALE_DATA = {
     saveRetained: "{error} Le score est resté dans le cache local.",
     saveBackendFailed: "Impossible d'enregistrer le score dans le backend du classement. Le score est resté dans le cache local.",
     errors: {
+      cacheReadFailed: "Impossible de lire la copie locale en cache du classement.",
       invalidPayload: "Réponse invalide du backend du classement.",
       backendError: "Le backend du classement a renvoyé une erreur.",
       missingEntries: "Le backend du classement n'a pas renvoyé de liste de scores.",

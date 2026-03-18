@@ -12,6 +12,7 @@ window.ARKANOID_LOCALE_DATA = {
     lives: "Elämät",
   },
   common: {
+    anonymous: "Anonyymi",
     start: "Aloita",
     newGame: "Uusi peli",
     continue: "Jatka",
@@ -58,6 +59,7 @@ window.ARKANOID_LOCALE_DATA = {
     saveRetained: "{error} Tulos jäi paikalliseen välimuistiin.",
     saveBackendFailed: "Tulosta ei voitu tallentaa tulostaulun taustapalveluun. Tulos jäi paikalliseen välimuistiin.",
     errors: {
+      cacheReadFailed: "Tulostaulun paikallista välimuistikopiota ei voitu lukea.",
       invalidPayload: "Virheellinen vastaus tulostaulun taustapalvelulta.",
       backendError: "Tulostaulun taustapalvelu palautti virheen.",
       missingEntries: "Tulostaulun taustapalvelu ei palauttanut tuloslistaa.",

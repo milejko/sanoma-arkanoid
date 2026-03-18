@@ -12,6 +12,7 @@ window.ARKANOID_LOCALE_DATA = {
     lives: "ライフ",
   },
   common: {
+    anonymous: "匿名",
     start: "スタート",
     newGame: "新しいゲーム",
     continue: "続ける",
@@ -58,6 +59,7 @@ window.ARKANOID_LOCALE_DATA = {
     saveRetained: "{error} スコアはローカルキャッシュに残りました。",
     saveBackendFailed: "ランキングのバックエンドにスコアを保存できませんでした。スコアはローカルキャッシュに残りました。",
     errors: {
+      cacheReadFailed: "ランキングのローカルキャッシュを読み取れませんでした。",
       invalidPayload: "ランキングバックエンドから無効な応答が返されました。",
       backendError: "ランキングバックエンドがエラーを返しました。",
       missingEntries: "ランキングバックエンドがスコア一覧を返しませんでした。",

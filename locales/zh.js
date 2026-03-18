@@ -12,6 +12,7 @@ window.ARKANOID_LOCALE_DATA = {
     lives: "生命",
   },
   common: {
+    anonymous: "匿名",
     start: "开始",
     newGame: "新游戏",
     continue: "继续",
@@ -58,6 +59,7 @@ window.ARKANOID_LOCALE_DATA = {
     saveRetained: "{error} 分数已保留在本地缓存中。",
     saveBackendFailed: "无法将分数保存到排行榜后端。分数已保留在本地缓存中。",
     errors: {
+      cacheReadFailed: "无法读取排行榜的本地缓存副本。",
       invalidPayload: "排行榜后端返回了无效响应。",
       backendError: "排行榜后端返回了错误。",
       missingEntries: "排行榜后端没有返回分数列表。",

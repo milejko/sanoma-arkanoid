@@ -12,6 +12,7 @@ window.ARKANOID_LOCALE_DATA = {
     lives: "Liv",
   },
   common: {
+    anonymous: "Anonym",
     start: "Start",
     newGame: "Nytt spel",
     continue: "Fortsätt",
@@ -58,6 +59,7 @@ window.ARKANOID_LOCALE_DATA = {
     saveRetained: "{error} Poängen stannade i den lokala cachen.",
     saveBackendFailed: "Det gick inte att spara poängen i topplistans backend. Poängen stannade i den lokala cachen.",
     errors: {
+      cacheReadFailed: "Det gick inte att läsa den lokala cachekopian av topplistan.",
       invalidPayload: "Ogiltigt svar från toppliste-backenden.",
       backendError: "Toppliste-backenden returnerade ett fel.",
       missingEntries: "Toppliste-backenden returnerade ingen poänglista.",

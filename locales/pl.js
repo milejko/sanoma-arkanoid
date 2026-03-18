@@ -12,6 +12,7 @@ window.ARKANOID_LOCALE_DATA = {
     lives: "Życia",
   },
   common: {
+    anonymous: "Anonim",
     start: "Start",
     newGame: "Nowa gra",
     continue: "Kontynuuj",
@@ -58,6 +59,7 @@ window.ARKANOID_LOCALE_DATA = {
     saveRetained: "{error} Wynik pozostał w lokalnej kopii.",
     saveBackendFailed: "Nie udało się zapisać wyniku w backendzie leaderboardu. Wynik pozostał w lokalnej kopii.",
     errors: {
+      cacheReadFailed: "Nie udało się odczytać lokalnej kopii leaderboardu.",
       invalidPayload: "Nieprawidłowa odpowiedź backendu leaderboardu.",
       backendError: "Backend leaderboardu zwrócił błąd.",
       missingEntries: "Backend leaderboardu nie zwrócił listy wyników.",

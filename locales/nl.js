@@ -12,6 +12,7 @@ window.ARKANOID_LOCALE_DATA = {
     lives: "Levens",
   },
   common: {
+    anonymous: "Anoniem",
     start: "Start",
     newGame: "Nieuw spel",
     continue: "Doorgaan",
@@ -58,6 +59,7 @@ window.ARKANOID_LOCALE_DATA = {
     saveRetained: "{error} De score bleef in de lokale cache staan.",
     saveBackendFailed: "De score kon niet in de scorebord-backend worden opgeslagen. De score bleef in de lokale cache staan.",
     errors: {
+      cacheReadFailed: "De lokale cachekopie van het scorebord kon niet worden gelezen.",
       invalidPayload: "Ongeldige reactie van de scorebord-backend.",
       backendError: "De scorebord-backend gaf een fout terug.",
       missingEntries: "De scorebord-backend gaf geen scorelijst terug.",

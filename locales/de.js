@@ -12,6 +12,7 @@ window.ARKANOID_LOCALE_DATA = {
     lives: "Leben",
   },
   common: {
+    anonymous: "Anonym",
     start: "Start",
     newGame: "Neues Spiel",
     continue: "Fortsetzen",
@@ -58,6 +59,7 @@ window.ARKANOID_LOCALE_DATA = {
     saveRetained: "{error} Der Punktestand blieb im lokalen Cache.",
     saveBackendFailed: "Der Punktestand konnte nicht im Bestenlisten-Backend gespeichert werden. Er blieb im lokalen Cache.",
     errors: {
+      cacheReadFailed: "Die lokale zwischengespeicherte Bestenliste konnte nicht gelesen werden.",
       invalidPayload: "Ungültige Antwort vom Bestenlisten-Backend.",
       backendError: "Das Bestenlisten-Backend hat einen Fehler zurückgegeben.",
       missingEntries: "Das Bestenlisten-Backend hat keine Ergebnisliste zurückgegeben.",
