@@ -166,6 +166,8 @@ Przy zmianach warto przetestować:
 
 Plik `history.md` zawiera kolejne polecenia i decyzje produktowe rozwijające grę. To główne źródło kontekstu dla dalszych zmian mechaniki, wyglądu i UX.
 
+Skróconą, bardziej opisową syntezę tej historii znajdziesz w `journey.md`.
+
 ## Autorstwo
 
 Projekt rozwijany iteracyjnie jako przeglądarkowa gra typu arcade z naciskiem na prostą, szybką rozgrywkę.
