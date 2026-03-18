@@ -22,6 +22,10 @@ window.ARKANOID_LOCALE_DATA = {
     resume: "Wznów",
     subtitleAria: "Trzy kawy",
   },
+  savedGame: {
+    saveFailed: "Nie udało się zapisać stanu gry w lokalnej pamięci.",
+    restoreFailed: "Nie udało się odtworzyć stanu gry z lokalnej pamięci.",
+  },
   start: {
     subtitleStart: "Zaczynamy? 🚀",
     subtitleContinue: "Nic straconego. 🙂",

@@ -22,6 +22,10 @@ window.ARKANOID_LOCALE_DATA = {
     resume: "继续",
     subtitleAria: "三杯咖啡",
   },
+  savedGame: {
+    saveFailed: "无法将保存的游戏状态写入本地缓存。",
+    restoreFailed: "无法从本地缓存恢复保存的游戏状态。",
+  },
   start: {
     subtitleStart: "准备开始吗？🚀",
     subtitleContinue: "还没结束呢。🙂",

@@ -22,6 +22,10 @@ window.ARKANOID_LOCALE_DATA = {
     resume: "再開",
     subtitleAria: "コーヒー3杯",
   },
+  savedGame: {
+    saveFailed: "保存したゲーム状態をローカルキャッシュに保存できませんでした。",
+    restoreFailed: "保存したゲーム状態をローカルキャッシュから復元できませんでした。",
+  },
   start: {
     subtitleStart: "始めようか？🚀",
     subtitleContinue: "まだ終わりじゃない。🙂",

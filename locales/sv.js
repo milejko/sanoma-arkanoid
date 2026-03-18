@@ -22,6 +22,10 @@ window.ARKANOID_LOCALE_DATA = {
     resume: "Återuppta",
     subtitleAria: "Tre kaffe",
   },
+  savedGame: {
+    saveFailed: "Det sparade spelläget kunde inte lagras i den lokala cachen.",
+    restoreFailed: "Det sparade spelläget kunde inte återställas från den lokala cachen.",
+  },
   start: {
     subtitleStart: "Kör vi? 🚀",
     subtitleContinue: "Det är inte över än. 🙂",

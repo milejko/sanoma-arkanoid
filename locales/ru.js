@@ -22,6 +22,10 @@ window.ARKANOID_LOCALE_DATA = {
     resume: "Продолжить",
     subtitleAria: "Три чашки кофе",
   },
+  savedGame: {
+    saveFailed: "Не удалось сохранить состояние игры в локальном кэше.",
+    restoreFailed: "Не удалось восстановить состояние игры из локального кэша.",
+  },
   start: {
     subtitleStart: "Начинаем? 🚀",
     subtitleContinue: "Ещё не всё потеряно. 🙂",

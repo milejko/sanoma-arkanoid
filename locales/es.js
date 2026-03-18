@@ -22,6 +22,10 @@ window.ARKANOID_LOCALE_DATA = {
     resume: "Reanudar",
     subtitleAria: "Tres cafés",
   },
+  savedGame: {
+    saveFailed: "No se pudo guardar la partida en la caché local.",
+    restoreFailed: "No se pudo restaurar la partida desde la caché local.",
+  },
   start: {
     subtitleStart: "¿Empezamos? 🚀",
     subtitleContinue: "Aún no está perdido. 🙂",

@@ -22,6 +22,10 @@ window.ARKANOID_LOCALE_DATA = {
     resume: "Weiter",
     subtitleAria: "Drei Kaffees",
   },
+  savedGame: {
+    saveFailed: "Der gespeicherte Spielstand konnte nicht im lokalen Speicher gesichert werden.",
+    restoreFailed: "Der gespeicherte Spielstand konnte nicht aus dem lokalen Speicher wiederhergestellt werden.",
+  },
   start: {
     subtitleStart: "Los geht's? 🚀",
     subtitleContinue: "Noch ist nichts verloren. 🙂",

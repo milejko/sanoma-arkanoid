@@ -22,6 +22,10 @@ window.ARKANOID_LOCALE_DATA = {
     resume: "Hervatten",
     subtitleAria: "Drie koffies",
   },
+  savedGame: {
+    saveFailed: "De opgeslagen spelstatus kon niet in de lokale cache worden bewaard.",
+    restoreFailed: "De opgeslagen spelstatus kon niet uit de lokale cache worden hersteld.",
+  },
   start: {
     subtitleStart: "Klaar om te beginnen? 🚀",
     subtitleContinue: "Nog niet verloren. 🙂",

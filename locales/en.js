@@ -22,6 +22,10 @@ window.ARKANOID_LOCALE_DATA = {
     resume: "Resume",
     subtitleAria: "Three coffees",
   },
+  savedGame: {
+    saveFailed: "Saved game could not be stored in local cache.",
+    restoreFailed: "Saved game could not be restored from local cache.",
+  },
   start: {
     subtitleStart: "Ready to start? 🚀",
     subtitleContinue: "Not over yet. 🙂",

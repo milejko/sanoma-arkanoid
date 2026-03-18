@@ -54,6 +54,8 @@ const LEADERBOARD_SUPABASE_TABLE =
     : "leaderboard_entries";
 const MAX_HIGH_SCORES = 10;
 const LEADERBOARD_CACHE_KEY = "arkanoid-leaderboard-cache";
+const PAUSED_GAME_STATE_KEY = "arkanoid-paused-game";
+const PAUSED_GAME_STATE_VERSION = 1;
 const CANVAS_EDGE_MARGIN = 12;
 const GRID_COLUMNS = 8;
 const GRID_ROWS = 26;
@@ -783,6 +785,247 @@ function saveCachedHighScores(entries) {
   return normalizedEntries;
 }
 
+function clearPersistedPausedGameState() {
+  window.localStorage.removeItem(PAUSED_GAME_STATE_KEY);
+}
+
+function createPausedGameSnapshot() {
+  return {
+    version: PAUSED_GAME_STATE_VERSION,
+    game: {
+      score: game.score,
+      lives: game.lives,
+      level: game.level,
+      running: game.running,
+      won: game.won,
+      message: game.message,
+      startOverlayMode: game.startOverlayMode,
+      pendingLevelAdvance: game.pendingLevelAdvance,
+    },
+    paddle: {
+      x: paddle.x,
+      velocityX: paddle.velocityX,
+    },
+    ball: {
+      x: ball.x,
+      y: ball.y,
+      velocityX: ball.velocityX,
+      velocityY: ball.velocityY,
+      attached: ball.attached,
+      stickyAttachment: ball.stickyAttachment,
+      stickyAutoLaunchTimer: ball.stickyAutoLaunchTimer,
+      paddleOffsetX: ball.paddleOffsetX,
+      trail: ball.trail.map((point) => ({
+        x: point.x,
+        y: point.y,
+      })),
+    },
+    effects: {
+      ...effects,
+    },
+    bricks: bricks.map((brick) => ({
+      row: brick.row,
+      column: brick.column,
+      alive: brick.alive,
+      material: brick.material,
+      destructible: brick.destructible !== false,
+      hitPoints: brick.hitPoints,
+      maxHitPoints: brick.maxHitPoints,
+      bonusType: brick.bonusType,
+    })),
+    fallingBonuses: fallingBonuses.map((bonus) => ({
+      type: bonus.type,
+      x: bonus.x,
+      y: bonus.y,
+      phase: bonus.phase,
+    })),
+    projectiles: projectiles.map((projectile) => ({
+      x: projectile.x,
+      y: projectile.y,
+      canDestroyWalls: projectile.canDestroyWalls === true,
+      instantDestroy: projectile.instantDestroy === true,
+    })),
+  };
+}
+
+function persistPausedGameState() {
+  if (!game.paused || !game.running || leaderboardState.mode) {
+    clearPersistedPausedGameState();
+    return false;
+  }
+
+  try {
+    window.localStorage.setItem(PAUSED_GAME_STATE_KEY, JSON.stringify(createPausedGameSnapshot()));
+    return true;
+  } catch (error) {
+    console.warn(t("savedGame.saveFailed"), error);
+    return false;
+  }
+}
+
+function normalizeSavedNumber(value, fallback = 0) {
+  const numericValue = Number(value);
+  return Number.isFinite(numericValue) ? numericValue : fallback;
+}
+
+function clampToRange(value, min, max) {
+  return Math.max(min, Math.min(max, value));
+}
+
+function restorePausedGameState() {
+  const rawSnapshot = window.localStorage.getItem(PAUSED_GAME_STATE_KEY);
+
+  if (!rawSnapshot) {
+    return false;
+  }
+
+  try {
+    const snapshot = JSON.parse(rawSnapshot);
+
+    if (!snapshot || snapshot.version !== PAUSED_GAME_STATE_VERSION || !snapshot.game || !snapshot.paddle || !snapshot.ball) {
+      throw new Error(t("savedGame.restoreFailed"));
+    }
+
+    if (snapshot.game.running !== true || !Array.isArray(snapshot.bricks) || snapshot.bricks.length === 0) {
+      throw new Error(t("savedGame.restoreFailed"));
+    }
+
+    game.score = Math.max(0, Math.floor(normalizeSavedNumber(snapshot.game.score)));
+    game.lives = Math.max(0, Math.floor(normalizeSavedNumber(snapshot.game.lives, 3)));
+    game.level = Math.max(1, Math.floor(normalizeSavedNumber(snapshot.game.level, 1)));
+    game.running = snapshot.game.running === true;
+    game.paused = true;
+    game.won = snapshot.game.won === true;
+    game.message = typeof snapshot.game.message === "string" ? snapshot.game.message : "";
+    game.startOverlayMode = snapshot.game.startOverlayMode === "continue" ? "continue" : "levelStart";
+    game.pendingLevelAdvance = snapshot.game.pendingLevelAdvance === true;
+
+    effects.paddleSizeLevel = clampToRange(
+      Math.floor(normalizeSavedNumber(snapshot.effects?.paddleSizeLevel, neutralLevelIndex)),
+      0,
+      paddleSizeLevels.length - 1
+    );
+    effects.stickyActive = snapshot.effects?.stickyActive === true;
+    effects.stickyTimer = Math.max(0, normalizeSavedNumber(snapshot.effects?.stickyTimer));
+    effects.shooterActive = snapshot.effects?.shooterActive === true;
+    effects.superShooterActive = snapshot.effects?.superShooterActive === true;
+    effects.superShooterKeepsShooter = snapshot.effects?.superShooterKeepsShooter === true;
+    effects.superShooterTimer = Math.max(0, normalizeSavedNumber(snapshot.effects?.superShooterTimer));
+    effects.tripleCannonActive = snapshot.effects?.tripleCannonActive === true;
+    effects.tripleCannonKeepsShooter = snapshot.effects?.tripleCannonKeepsShooter === true;
+    effects.tripleCannonTimer = Math.max(0, normalizeSavedNumber(snapshot.effects?.tripleCannonTimer));
+    effects.superBallActive = snapshot.effects?.superBallActive === true;
+    effects.superBallTimer = Math.max(0, normalizeSavedNumber(snapshot.effects?.superBallTimer));
+    effects.speedModifier = normalizeSavedNumber(snapshot.effects?.speedModifier);
+    effects.speedTimer = Math.max(0, normalizeSavedNumber(snapshot.effects?.speedTimer));
+    effects.shotCooldown = Math.max(0, normalizeSavedNumber(snapshot.effects?.shotCooldown));
+
+    bricks = snapshot.bricks.map((brick) => ({
+      row: Math.max(BRICK_START_ROW, Math.floor(normalizeSavedNumber(brick.row, BRICK_START_ROW))),
+      column: clampToRange(Math.floor(normalizeSavedNumber(brick.column, 0)), 0, GRID_COLUMNS - 1),
+      alive: brick.alive !== false,
+      x: 0,
+      y: 0,
+      width: 0,
+      height: brickConfig.height,
+      material: typeof brick.material === "string" ? brick.material : "standard",
+      destructible: brick.destructible !== false,
+      hitPoints: Math.max(0, Math.floor(normalizeSavedNumber(brick.hitPoints, 1))),
+      maxHitPoints: Math.max(1, Math.floor(normalizeSavedNumber(brick.maxHitPoints, 1))),
+      bonusType: typeof brick.bonusType === "string" ? brick.bonusType : null,
+    }));
+    layoutBricks();
+
+    paddle.baseWidth = getBasePaddleWidth();
+    syncPaddleWidth();
+    paddle.x = clampToRange(
+      normalizeSavedNumber(snapshot.paddle.x, paddle.x),
+      getPlayfieldLeftBoundary(),
+      getPlayfieldRightBoundary() - paddle.width
+    );
+    paddle.y = getPaddleY();
+    paddle.velocityX = normalizeSavedNumber(snapshot.paddle.velocityX);
+
+    ball.attached = snapshot.ball.attached === true;
+    ball.stickyAttachment = snapshot.ball.stickyAttachment === true;
+    ball.stickyAutoLaunchTimer = Math.max(0, normalizeSavedNumber(snapshot.ball.stickyAutoLaunchTimer));
+    ball.paddleOffsetX = getClampedPaddleOffset(normalizeSavedNumber(snapshot.ball.paddleOffsetX));
+    ball.velocityX = normalizeSavedNumber(snapshot.ball.velocityX);
+    ball.velocityY = normalizeSavedNumber(snapshot.ball.velocityY);
+    ball.spin = 0;
+    ball.trail = Array.isArray(snapshot.ball.trail)
+      ? snapshot.ball.trail
+          .map((point) => ({
+            x: normalizeSavedNumber(point.x, ball.x),
+            y: normalizeSavedNumber(point.y, ball.y),
+          }))
+          .slice(0, 12)
+      : [];
+
+    if (ball.attached) {
+      attachBallToPaddle(ball.paddleOffsetX, ball.stickyAttachment);
+    } else {
+      ball.x = clampToRange(
+        normalizeSavedNumber(snapshot.ball.x, paddle.x + paddle.width / 2),
+        getPlayfieldLeftBoundary() + ball.radius,
+        getPlayfieldRightBoundary() - ball.radius
+      );
+      ball.y = clampToRange(
+        normalizeSavedNumber(snapshot.ball.y, paddle.y - ball.radius - getBallAttachmentGap()),
+        getPlayfieldTopBoundary() + ball.radius,
+        getPlayfieldBottomBoundary() - ball.radius
+      );
+    }
+
+    fallingBonuses = Array.isArray(snapshot.fallingBonuses)
+      ? snapshot.fallingBonuses.map((bonus) => ({
+          type: typeof bonus.type === "string" ? bonus.type : "widen",
+          x: normalizeSavedNumber(bonus.x),
+          y: normalizeSavedNumber(bonus.y),
+          size: getBonusSize(),
+          speed: getBonusFallSpeed(),
+          phase: normalizeSavedNumber(bonus.phase),
+        }))
+      : [];
+
+    projectiles = Array.isArray(snapshot.projectiles)
+      ? snapshot.projectiles.map((projectile) => {
+          const projectileWidth = getProjectileWidth();
+          return {
+            width: projectileWidth,
+            height: getProjectileHeight(),
+            x: normalizeSavedNumber(projectile.x),
+            y: normalizeSavedNumber(projectile.y),
+            speed: getProjectileSpeed(),
+            canDestroyWalls: projectile.canDestroyWalls === true,
+            instantDestroy: projectile.instantDestroy === true,
+          };
+        })
+      : [];
+
+    leaderboardState.mode = null;
+    leaderboardState.scoreSaved = false;
+    leaderboardState.loading = false;
+    leaderboardState.saving = false;
+    leaderboardState.showingCachedCopy = false;
+    leaderboardState.statusMessage = "";
+    leaderboardState.statusTone = "info";
+    controls.left = false;
+    controls.right = false;
+    lastPointerMoveTime = 0;
+
+    updateHud();
+    renderLeaderboard();
+    renderStartOverlay();
+    renderPauseOverlay();
+    return true;
+  } catch (error) {
+    console.warn(t("savedGame.restoreFailed"), error);
+    clearPersistedPausedGameState();
+    return false;
+  }
+}
+
 function useCachedHighScores() {
   highScores = loadCachedHighScores();
   leaderboardState.showingCachedCopy = highScores.length > 0;
@@ -1126,6 +1369,7 @@ function pauseGame() {
   game.paused = true;
   controls.left = false;
   controls.right = false;
+  persistPausedGameState();
   renderStartOverlay();
   renderPauseOverlay();
   playSound("pause");
@@ -1142,6 +1386,7 @@ function resumeGame() {
   controls.left = false;
   controls.right = false;
   lastPointerMoveTime = 0;
+  clearPersistedPausedGameState();
   renderPauseOverlay();
   renderStartOverlay();
   playSound("resume");
@@ -1247,6 +1492,7 @@ function startFromLeaderboard() {
     resetGame();
   }
 
+  clearPersistedPausedGameState();
   hideLeaderboard();
   launchBall();
 }
@@ -1787,6 +2033,7 @@ function resetRound() {
 }
 
 function resetGame() {
+  clearPersistedPausedGameState();
   game.score = 0;
   game.lives = 3;
   game.level = 1;
@@ -3497,7 +3744,11 @@ function animate(timestamp) {
 }
 
 resizeCanvas();
-resetGame();
-showLeaderboard("intro");
+
+if (!restorePausedGameState()) {
+  resetGame();
+  showLeaderboard("intro");
+}
+
 draw();
 window.requestAnimationFrame(animate);

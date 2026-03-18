@@ -22,6 +22,10 @@ window.ARKANOID_LOCALE_DATA = {
     resume: "Jatka",
     subtitleAria: "Kolme kahvia",
   },
+  savedGame: {
+    saveFailed: "Tallennettua pelitilaa ei voitu tallentaa paikalliseen välimuistiin.",
+    restoreFailed: "Tallennettua pelitilaa ei voitu palauttaa paikallisesta välimuistista.",
+  },
   start: {
     subtitleStart: "Aloitetaanko? 🚀",
     subtitleContinue: "Ei vielä ohi. 🙂",
