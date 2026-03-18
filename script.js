@@ -56,6 +56,7 @@ const MAX_HIGH_SCORES = 10;
 const LEADERBOARD_CACHE_KEY = "arkanoid-leaderboard-cache";
 const PAUSED_GAME_STATE_KEY = "arkanoid-paused-game";
 const PAUSED_GAME_STATE_VERSION = 1;
+const PLAYER_NAME_SESSION_KEY = "arkanoid-player-name";
 const CANVAS_EDGE_MARGIN = 12;
 const GRID_COLUMNS = 8;
 const GRID_ROWS = 26;
@@ -785,6 +786,30 @@ function saveCachedHighScores(entries) {
   return normalizedEntries;
 }
 
+function loadRememberedPlayerName() {
+  try {
+    return sanitizePlayerName(window.sessionStorage.getItem(PLAYER_NAME_SESSION_KEY) || "");
+  } catch (error) {
+    return "";
+  }
+}
+
+function persistRememberedPlayerName(name) {
+  const normalizedName = sanitizePlayerName(name);
+
+  try {
+    if (normalizedName) {
+      window.sessionStorage.setItem(PLAYER_NAME_SESSION_KEY, normalizedName);
+    } else {
+      window.sessionStorage.removeItem(PLAYER_NAME_SESSION_KEY);
+    }
+  } catch (error) {
+    // Session storage persistence is optional.
+  }
+
+  return normalizedName;
+}
+
 function clearPersistedPausedGameState() {
   window.localStorage.removeItem(PAUSED_GAME_STATE_KEY);
 }
@@ -1398,9 +1423,10 @@ function showLeaderboard(mode) {
   leaderboardState.scoreSaved = mode !== "gameover";
   controls.left = false;
   controls.right = false;
+  playerNameInput.value = loadRememberedPlayerName();
 
   if (mode === "gameover") {
-    playerNameInput.value = "";
+    playerNameInput.value = loadRememberedPlayerName();
   }
 
   if (useCachedHighScores() && !leaderboardState.loading && !leaderboardState.saving) {
@@ -1449,6 +1475,7 @@ async function saveCurrentScore() {
   highScores = saveCachedHighScores([entry, ...highScores]);
   leaderboardState.showingCachedCopy = true;
   playerNameInput.value = entry.name;
+  persistRememberedPlayerName(entry.name);
   renderLeaderboard();
 
   try {
@@ -3699,6 +3726,7 @@ window.addEventListener("resize", resizeCanvas);
 
 playerNameInput.addEventListener("input", () => {
   playerNameInput.value = sanitizePlayerName(playerNameInput.value);
+  persistRememberedPlayerName(playerNameInput.value);
 });
 
 scoreFormElement.addEventListener("submit", (event) => {

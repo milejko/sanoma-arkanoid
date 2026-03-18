@@ -34,6 +34,7 @@
 - DOM visibility is driven by CSS classes and specific IDs already wired in `script.js`, especially `.hidden`, `#leaderboardOverlay`, `#pauseOverlay`, `#startOverlay`, and `#scoreForm`. If you change overlay/HUD structure in HTML, update the matching selectors and event wiring together.
 - The current branding is a non-interactive `Arkanoid` wordmark built from `.brand-chip` spans with a white glow. Do not reintroduce pause behavior or other interactions on the logo unless explicitly requested.
 - High-score entries are normalized before storage: names are trimmed, uppercased, and limited to 10 characters. Preserve that sanitization path when touching leaderboard code.
+- The leaderboard also remembers the last entered player name in `sessionStorage` for the current browser session. Keep that helper in sync when changing score form behavior.
 - Leaderboard reads and writes use a localStorage cache first (`arkanoid-leaderboard-cache`), then synchronize with Supabase over the REST API. Frontend/backend changes have to stay in sync across both the cache/payload handling in `script.js` and the `leaderboard_entries` table contract (`name`, `device_type`, `level`, `score`).
 - `history.md` is the main record of the user's past instructions and product decisions, not just a scratch log. Read it before changing gameplay, visuals, copy, or bonus behavior so new work stays aligned with earlier decisions.
 - If future work involves maintaining `history.md`, append new commands instead of rewriting or summarizing the file.

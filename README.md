@@ -30,6 +30,7 @@ Projekt powstał jako statyczna aplikacja front-endowa:
 - pauza zapisuje stan aktywnej rundy do `localStorage`, więc po zamknięciu karty można wrócić do rozgrywki dokładnie z miejsca przerwania,
 - tablica wyników z limitem **top 10**,
 - lokalna kopia hi-score w `localStorage`,
+- ostatnio użyte imię gracza zapamiętywane w `sessionStorage` w ramach bieżącej sesji przeglądarki,
 - synchronizacja wyników z Supabase,
 - responsywny interfejs dla desktopu i urządzeń mobilnych,
 - wersjonowanie widoczne w prawym dolnym rogu.
