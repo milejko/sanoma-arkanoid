@@ -234,3 +234,4 @@ Plik utrzymywany na bieżąco. Każde kolejne polecenie użytkownika w tej sesji
 227. `fix: przejscie do kolejnego poziomu rozstrzygamy po calej klatce gry, zeby zbicie ostatniego kafla pilka albo super-armata nie zawieszalo konca rundy`
 228. `feat: frontend leaderboardu przechodzi z Google Apps Script na Supabase REST API z tabela leaderboard_entries`
 229. `cleanup: usuwamy martwy skrypt Google Apps Script i czyscimy dokumentacje oraz klucze locale po migracji leaderboardu do Supabase`
+230. `refactor: konfiguracje Supabase wynosimy z script.js do bootstrapu index.html, zeby latwiej zmieniac projekt bez ruszania logiki gry`

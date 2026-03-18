@@ -6,15 +6,18 @@
     <title>Arkanoid</title>
     <script>
       (() => {
-        const historyEntryNumber = 229;
+        const historyEntryNumber = 230;
         const major = Math.floor(historyEntryNumber / 100);
         const minor = Math.floor((historyEntryNumber % 100) / 10);
         const patch = historyEntryNumber % 10;
         const version = `${major}.${minor}.${patch}`;
-        const lastUpdated = "18.03.2026 10:53";
+        const lastUpdated = "18.03.2026 10:56";
         window.APP_HISTORY_ENTRY_NUMBER = historyEntryNumber;
         window.APP_VERSION = version;
         window.APP_LAST_UPDATED = lastUpdated;
+        window.APP_SUPABASE_URL = "https://rbkkcjxzzhhusuokzted.supabase.co";
+        window.APP_SUPABASE_ANON_KEY = "sb_publishable_wf-zkwg_jmhpnA9pm0RgNA_Uk_aSTFf";
+        window.APP_SUPABASE_TABLE = "leaderboard_entries";
         const supportedLocales = ["pl", "en", "nl", "sv", "fi", "es", "ru", "fr", "it", "de", "zh", "ja"];
         const browserLanguages = Array.isArray(navigator.languages) && navigator.languages.length
           ? navigator.languages

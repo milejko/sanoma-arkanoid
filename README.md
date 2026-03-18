@@ -131,7 +131,7 @@ Następnie otwórz stronę pod lokalnym adresem serwera, np. `http://localhost:8
 
 ## Leaderboard online
 
-Backend wyników znajduje się w Supabase, a frontend komunikuje się z nim przez publiczny endpoint REST konfigurowany w `script.js`.
+Backend wyników znajduje się w Supabase, a frontend komunikuje się z nim przez publiczny endpoint REST konfigurowany w bootstrapie `index.html`.
 
 Obecna implementacja:
 
@@ -142,8 +142,9 @@ Obecna implementacja:
 
 Jeśli chcesz przenieść leaderboard na inny projekt Supabase, trzeba zaktualizować:
 
-- `LEADERBOARD_SUPABASE_URL` w `script.js`,
-- `LEADERBOARD_SUPABASE_ANON_KEY` w `script.js`.
+- `window.APP_SUPABASE_URL` w `index.html`,
+- `window.APP_SUPABASE_ANON_KEY` w `index.html`,
+- opcjonalnie `window.APP_SUPABASE_TABLE` w `index.html`.
 
 ## Rozwój projektu
 

@@ -40,9 +40,18 @@ const controls = {
 let lastOutsideCanvasActionAt = 0;
 let lastCanvasTouchActionAt = 0;
 
-const LEADERBOARD_SUPABASE_URL = "https://rbkkcjxzzhhusuokzted.supabase.co";
-const LEADERBOARD_SUPABASE_ANON_KEY = "sb_publishable_wf-zkwg_jmhpnA9pm0RgNA_Uk_aSTFf";
-const LEADERBOARD_SUPABASE_TABLE = "leaderboard_entries";
+const LEADERBOARD_SUPABASE_URL =
+  typeof window.APP_SUPABASE_URL === "string" && window.APP_SUPABASE_URL
+    ? window.APP_SUPABASE_URL
+    : "REPLACE_WITH_SUPABASE_URL";
+const LEADERBOARD_SUPABASE_ANON_KEY =
+  typeof window.APP_SUPABASE_ANON_KEY === "string" && window.APP_SUPABASE_ANON_KEY
+    ? window.APP_SUPABASE_ANON_KEY
+    : "REPLACE_WITH_SUPABASE_ANON_KEY";
+const LEADERBOARD_SUPABASE_TABLE =
+  typeof window.APP_SUPABASE_TABLE === "string" && window.APP_SUPABASE_TABLE
+    ? window.APP_SUPABASE_TABLE
+    : "leaderboard_entries";
 const MAX_HIGH_SCORES = 10;
 const LEADERBOARD_CACHE_KEY = "arkanoid-leaderboard-cache";
 const CANVAS_EDGE_MARGIN = 12;
